@@ -126,7 +126,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-dist-${{ matrix.node-version }}
-          path: frontend/dist/
+          path: dist/
           if-no-files-found: ignore
           retention-days: 7
 
