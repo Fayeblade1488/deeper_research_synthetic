@@ -327,3 +327,263 @@ body {
     background-color: var(--accent-blue);
     color: white;
 }
+
+/* Generation Control Panel Styles */
+.generation-control-panel {
+    position: relative;
+}
+
+.generation-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.control-buttons {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+.generate-btn {
+    background-color: var(--accent-blue);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.generate-btn:hover:not(:disabled) {
+    background-color: var(--accent-blue-hover);
+}
+
+.generate-btn:disabled {
+    background-color: var(--background-lighter);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.cancel-btn {
+    background-color: var(--accent-red);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.cancel-btn:hover {
+    background-color: var(--accent-red-hover);
+}
+
+.generation-progress {
+    width: 100%;
+}
+
+.progress-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background-color: var(--background-lighter);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--accent-blue);
+    transition: width 0.3s ease;
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.generation-complete {
+    padding: 0.5rem 0;
+}
+
+.generation-complete .status.success {
+    color: #10b981;
+    font-weight: 500;
+}
+
+.completion-stats {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.validation-results {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.validation-success {
+    color: #10b981;
+    font-size: 0.8rem;
+}
+
+.validation-errors {
+    color: #ef4444;
+    font-size: 0.8rem;
+}
+
+.validation-errors .error {
+    display: block;
+    margin: 0.25rem 0;
+    color: #ef4444;
+}
+
+.validation-errors .warnings .warning {
+    display: block;
+    margin: 0.25rem 0;
+    color: #f59e0b;
+}
+
+.generation-error {
+    color: #ef4444;
+}
+
+.generation-error .status {
+    color: #ef4444;
+}
+
+.active-status {
+    padding: 0.5rem 0;
+    color: #10b981;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+/* Draft Panel with Overlay */
+.draft-panel {
+    position: relative;
+}
+
+.draft-content-wrapper {
+    position: relative;
+    height: 100%;
+}
+
+.generating-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(31, 41, 55, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    border-radius: 6px;
+}
+
+.generating-indicator {
+    background-color: var(--background-dark);
+    padding: 1rem 1.5rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.panel textarea.generating {
+    opacity: 0.3;
+}
+
+/* Generation Progress Panel Styles */
+.generation-progress-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.progress-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.progress-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.progress-percent {
+    min-width: 40px;
+    text-align: right;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.progress-stats {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: var(--background-lighter);
+    border-radius: 6px;
+    min-width: 60px;
+}
+
+.stat .label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.stat .value {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.status.success {
+    color: #10b981;
+}
+
+.status.error {
+    color: #ef4444;
+}
+
+.validation-results ul {
+    margin: 0.5rem 0 0 1rem;
+    padding-left: 0.5rem;
+}
+
+.validation-results li {
+    margin: 0.25rem 0;
+    font-size: 0.8rem;
+}
+
+.validation-results li.error {
+    color: #ef4444;
+}
+
+.validation-results li.warning {
+    color: #f59e0b;
+}

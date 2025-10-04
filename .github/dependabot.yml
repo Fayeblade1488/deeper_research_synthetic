@@ -1,0 +1,61 @@
+version: 2
+updates:
+  # Backend dependency updates
+  - package-ecosystem: "npm"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "Fayeblade1488"
+    assignees:
+      - "Fayeblade1488"
+    commit-message:
+      prefix: "deps(backend)"
+      include: "scope"
+    ignore:
+      # Ignore major version updates for these packages
+      - dependency-name: "express"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "jest"
+        update-types: ["version-update:semver-major"]
+
+  # Frontend dependency updates
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "Fayeblade1488"
+    assignees:
+      - "Fayeblade1488"
+    commit-message:
+      prefix: "deps(frontend)"
+      include: "scope"
+    ignore:
+      # Ignore major version updates for these packages
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "vite"
+        update-types: ["version-update:semver-major"]
+
+  # GitHub Actions updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "Fayeblade1488"
+    assignees:
+      - "Fayeblade1488"
+    commit-message:
+      prefix: "ci"
+      include: "scope"

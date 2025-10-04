@@ -1,0 +1,186 @@
+# YAML Schema for Persona/Framework Validation
+# JSON Schema Draft-07 Compatible Definition
+
+title: "Deeper Research Synthetic Framework Schema"
+description: "Schema for validating AI persona frameworks in YAML 3.0.0 format"
+
+type: object
+required:
+  - name
+  - version
+  - category
+  - documentation
+  - framework
+
+properties:
+  name:
+    type: string
+    description: "Human-readable name of the framework"
+    minLength: 3
+    maxLength: 100
+    pattern: "^[A-Za-z0-9\\s\\-_]+$"
+
+  version:
+    type: string
+    description: "Semantic version of the framework"
+    pattern: "^\\d+\\.\\d+(\\.\\d+)?(-[a-zA-Z0-9\\-]+)?$"
+    examples: ["1.0.0", "2.1.0", "1.0.0-beta"]
+
+  category:
+    type: string
+    description: "Framework category classification"
+    enum:
+      - "purpose-built"
+      - "general-purpose"
+      - "experimental"
+      - "legacy"
+      - "domain-specific"
+
+  documentation:
+    type: object
+    required:
+      - purpose
+      - use_case
+      - character_count
+    properties:
+      purpose:
+        type: string
+        description: "Primary purpose and objective of the framework"
+        minLength: 10
+        maxLength: 500
+
+      use_case:
+        type: string
+        description: "Specific use cases and applications"
+        minLength: 10
+        maxLength: 500
+
+      character_count:
+        type: integer
+        description: "Approximate character count of the framework content"
+        minimum: 100
+        maximum: 100000
+
+      tags:
+        type: array
+        description: "Optional tags for categorization and search"
+        items:
+          type: string
+          pattern: "^[a-z0-9\\-_]+$"
+        maxItems: 10
+
+      dependencies:
+        type: array
+        description: "Framework dependencies or requirements"
+        items:
+          type: string
+        maxItems: 5
+
+      compatibility:
+        type: object
+        description: "Compatibility information"
+        properties:
+          ai_models:
+            type: array
+            items:
+              type: string
+              enum: ["gemini", "gpt", "claude", "generic"]
+          framework_version:
+            type: string
+          minimum_context_length:
+            type: integer
+            minimum: 1000
+
+  framework:
+    type: object
+    required:
+      - content
+    properties:
+      content:
+        type: string
+        description: "The complete framework prompt/instructions in markdown format"
+        minLength: 100
+        maxLength: 50000
+
+      parameters:
+        type: object
+        description: "Optional framework-specific parameters"
+        properties:
+          min_words:
+            type: integer
+            minimum: 100
+          max_words:
+            type: integer
+            maximum: 50000
+          temperature:
+            type: number
+            minimum: 0.0
+            maximum: 2.0
+          output_format:
+            type: string
+            enum: ["markdown", "html", "plain_text", "json"]
+
+      validation_rules:
+        type: array
+        description: "Content validation rules"
+        items:
+          type: object
+          required:
+            - rule_type
+            - description
+          properties:
+            rule_type:
+              type: string
+              enum: ["word_count", "structure", "format", "content", "style"]
+            description:
+              type: string
+            required:
+              type: boolean
+            pattern:
+              type: string
+            min_occurrences:
+              type: integer
+            max_occurrences:
+              type: integer
+
+  metadata:
+    type: object
+    description: "Optional metadata for framework management"
+    properties:
+      author:
+        type: string
+        maxLength: 100
+      created_date:
+        type: string
+        format: date
+      modified_date:
+        type: string
+        format: date
+      license:
+        type: string
+        enum: ["MIT", "Apache-2.0", "GPL-3.0", "BSD-3-Clause", "CC0-1.0", "Custom"]
+      status:
+        type: string
+        enum: ["active", "deprecated", "experimental", "maintenance"]
+
+additionalProperties: false
+
+examples:
+  - name: "Deep Research Framework"
+    version: "1.0.0"
+    category: "purpose-built"
+    documentation:
+      purpose: "Advanced research framework with enhanced depth and source validation"
+      use_case: "Complex research projects requiring rigorous methodology and citation tracking"
+      character_count: 2615
+      tags: ["research", "academic", "citation"]
+    framework:
+      content: |
+        # Deep Researcher Prompt
+        You are Deep Researcher, a helpful deep research assistant...
+      parameters:
+        min_words: 10000
+        output_format: "markdown"
+    metadata:
+      author: "Paradroid AI"
+      status: "active"

@@ -1,1 +1,137 @@
+# ============================================
+# Initiative: IRONCLAD - .gitignore
+# ============================================
 
+# --- Environment & Secrets ---
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+secrets/
+
+# --- Node.js ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.npm
+.yarn/
+.pnp.*
+
+# --- Build Outputs ---
+dist/
+dist-ssr/
+build/
+*.local
+*.tsbuildinfo
+
+# --- Logs ---
+logs/
+*.log
+*.log.*
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# --- Testing ---
+coverage/
+.nyc_output/
+*.lcov
+.jest/
+
+# --- IDE & Editors ---
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+.vscode-test
+
+# --- OS Files ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# --- Temporary Files ---
+tmp/
+temp/
+*.tmp
+*.temp
+.cache/
+.parcel-cache/
+
+# --- Project-Specific ---
+# Generated content (keep source frameworks)
+data/reports/*.md
+data/reports/*.txt
+data/audio/*.mp3
+data/audio/*.wav
+data/audio/*.mp4
+
+# User-generated projects (if storing in data/)
+data/user-projects/
+
+# AI Assistant Context Files (keep local only)
+agent-context.md
+qwen-cli-context.txt.md
+WARP.md
+gemini-context.md
+context.md
+*-context.md
+.agent-logs/
+
+# Testing artifacts
+citation_test.js
+*test*.html
+
+# Backup files
+*.backup
+*.bak
+*~
+
+# --- Frontend Specific ---
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/.turbo/
+
+# --- Backend Specific ---
+backend/uploads/
+backend/generated/
+
+# --- Database ---
+*.sqlite
+*.sqlite3
+*.db
+
+# --- Optional: Keep example files ---
+!.env.example
+!*.example.*
+
+# --- Git ---
+*.orig
+*.rej
+.git/
+.gitattributes
+
+# --- Package Manager Locks (optional - uncomment if needed) ---
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
