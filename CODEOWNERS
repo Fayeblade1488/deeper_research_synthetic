@@ -1,49 +1,25 @@
-# CODEOWNERS - Deeper Research Synthetic
-#
-# This file defines code ownership for the Deeper Research Synthetic repository.
-# Each line represents a rule that matches files and assigns ownership to users or teams.
-# 
-# Global owners (fallback for all files)
+# Code owners for the Deeper Research Synthetic project
+# Format: file-pattern @owner1 @owner2
+
+# All files
 * @Fayeblade1488 @para-droid-ai
 
-# Documentation and configuration
-*.md @Fayeblade1488 @para-droid-ai
-*.yml @Fayeblade1488 @para-droid-ai
-*.yaml @Fayeblade1488 @para-droid-ai
+# Backend-specific files
+backend/**/* @Fayeblade1488 @para-droid-ai
+
+# Frontend-specific files
+frontend/**/* @Fayeblade1488 @para-droid-ai
+
+# Data/frameworks - critical for content generation
+data/frameworks/**/* @Fayeblade1488 @para-droid-ai
+
+# Configuration files
 *.json @Fayeblade1488 @para-droid-ai
-WARP.md @Fayeblade1488
-README.md @Fayeblade1488 @para-droid-ai
-CODEOWNERS @Fayeblade1488
-
-# Backend services and API
-/backend/ @Fayeblade1488 @para-droid-ai
-/backend/services/ @para-droid-ai @Fayeblade1488
-/backend/config/ @para-droid-ai @Fayeblade1488
-
-# Frontend components and UI
-/frontend/ @Fayeblade1488 @para-droid-ai
-/frontend/src/components/ @para-droid-ai @Fayeblade1488
-
-# AI Frameworks and Personas
-/data/frameworks/ @Fayeblade1488 @para-droid-ai
-/data/frameworks/scratchpads/ @Fayeblade1488
-/data/frameworks/schema/ @para-droid-ai @Fayeblade1488
-
-# Testing and validation
-/scripts/ @para-droid-ai @Fayeblade1488
-**/*.test.js @para-droid-ai @Fayeblade1488
-**/*.spec.js @para-droid-ai @Fayeblade1488
+*.env* @Fayeblade1488
 
 # Documentation
-/docs/ @Fayeblade1488 @para-droid-ai
-/docs/DEPLOYMENT_GUIDE.md @para-droid-ai
-/docs/TESTING_GUIDE.md @para-droid-ai
+docs/**/* @Fayeblade1488 @para-droid-ai
+*.md @Fayeblade1488 @para-droid-ai
 
-# Generated reports and output
-/data/reports/ @Fayeblade1488
-
-# Configuration and environment
-.env.example @para-droid-ai @Fayeblade1488
-.gitignore @para-droid-ai @Fayeblade1488
-package.json @para-droid-ai @Fayeblade1488
-package-lock.json @para-droid-ai @Fayeblade1488
+# CI/CD configuration
+.github/**/* @Fayeblade1488 @para-droid-ai

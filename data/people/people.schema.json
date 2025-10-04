@@ -1,0 +1,147 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "People YAML 3.0.0 Schema",
+  "description": "A schema for validating People YAML 3.0.0 files.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^3\\.0\\.0$"
+    },
+    "type": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "identity": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "methodology": {
+          "type": "string"
+        }
+      },
+      "required": ["role", "purpose", "methodology"]
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "scratchpad": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["description", "purpose", "features"]
+    },
+    "planning_phases": {
+      "type": "object",
+      "patternProperties": {
+        "^phase_[0-9]+$": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "actions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "verbalize": {
+              "type": "string"
+            },
+            "checklist": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": ["name", "description", "actions", "verbalize", "checklist"]
+        }
+      }
+    },
+    "protocols": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "role": {
+      "type": "object",
+      "properties": {
+        "adoption": {
+          "type": "string"
+        },
+        "execution": {
+          "type": "string"
+        }
+      },
+      "required": ["adoption", "execution"]
+    },
+    "preamble": {
+      "type": "string"
+    },
+    "mission": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "standards": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "name",
+    "version",
+    "type",
+    "description",
+    "identity",
+    "capabilities",
+    "scratchpad",
+    "planning_phases",
+    "protocols",
+    "constraints",
+    "role",
+    "preamble",
+    "mission",
+    "standards"
+  ]
+}

@@ -7,8 +7,16 @@ const { performanceMonitor } = require('../services/performanceService');
 const activeGenerations = new Map();
 
 /**
- * OPTIONS /api/generate/:projectId
- * Handle CORS preflight requests for POST generation
+ * @route OPTIONS /api/generate/:projectId
+ * @description Handles CORS preflight requests for the content generation endpoint.
+ * This is necessary to allow cross-origin POST requests from the frontend.
+ * 
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * 
+ * @returns {void}
+ * 
+ * @response {204} - An empty response indicating that the preflight request is successful.
  */
 router.options('/:projectId', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -19,8 +27,23 @@ router.options('/:projectId', (req, res) => {
 });
 
 /**
- * POST /api/generate/:projectId
- * Start content generation for a project with proper connection cleanup
+ * @route POST /api/generate/:projectId
+ * @description Initiates content generation for a specific project using Server-Sent Events (SSE) for real-time progress updates.
+ * It sets up an event stream, handles connection management, and calls the `generateContent` service.
+ * The route includes robust error handling and connection cleanup to prevent memory leaks and zombie processes.
+ * 
+ * @param {Object} req - The Express request object.
+ * @param {Object} req.params - The URL parameters.
+ * @param {string} req.params.projectId - The unique identifier of the project for which to generate content.
+ * @param {Object} req.body - The request body.
+ * @param {Object} req.body.project - The project object containing the context and other necessary data for content generation.
+ * @param {Object} res - The Express response object, which is configured as an SSE stream.
+ * 
+ * @returns {void}
+ * 
+ * @response {200} - The SSE stream is established, and progress updates are sent as events.
+ * @response {400} - An error object is returned if the project data is missing from the request body.
+ * @response {409} - An error object is returned if a generation process is already active for the specified project.
  */
 router.post('/:projectId', async (req, res) => {
     const { projectId } = req.params;
@@ -154,8 +177,21 @@ router.post('/:projectId', async (req, res) => {
 });
 
 /**
- * GET /api/generate/:projectId/status
- * Check generation status
+ * @route GET /api/generate/:projectId/status
+ * @description Checks the status of an active content generation process for a specific project.
+ * 
+ * @param {Object} req - The Express request object.
+ * @param {Object} req.params - The URL parameters.
+ * @param {string} req.params.projectId - The unique identifier of the project to check.
+ * @param {Object} res - The Express response object.
+ * 
+ * @returns {void}
+ * 
+ * @response {200} {Object} A status object with the following properties:
+ * - {boolean} active - Indicates whether a generation process is currently active for the project.
+ * - {string} [status] - The current status of the generation (e.g., 'running').
+ * - {number} [startTime] - The timestamp of when the generation process started.
+ * - {number} [duration] - The elapsed time in milliseconds since the generation process started.
  */
 router.get('/:projectId/status', (req, res) => {
     const { projectId } = req.params;
@@ -176,8 +212,19 @@ router.get('/:projectId/status', (req, res) => {
 });
 
 /**
- * DELETE /api/generate/:projectId
- * Cancel active generation with proper cleanup
+ * @route DELETE /api/generate/:projectId
+ * @description Cancels an active content generation process for a specific project.
+ * It clears any associated timeouts and performs the necessary cleanup to prevent memory leaks.
+ * 
+ * @param {Object} req - The Express request object.
+ * @param {Object} req.params - The URL parameters.
+ * @param {string} req.params.projectId - The unique identifier of the project for which to cancel the generation.
+ * @param {Object} res - The Express response object.
+ * 
+ * @returns {void}
+ * 
+ * @response {200} {Object} A confirmation message indicating that the generation was cancelled.
+ * @response {404} {Object} An error object indicating that no active generation was found for the specified project.
  */
 router.delete('/:projectId', (req, res) => {
     const { projectId } = req.params;

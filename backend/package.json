@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "lint": "echo 'No linting configured yet'",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

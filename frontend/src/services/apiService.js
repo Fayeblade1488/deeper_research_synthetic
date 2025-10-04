@@ -1,20 +1,22 @@
 const API_URL = 'http://localhost:3001/api';
 
 /**
- * API Service for THE LENS
- * Handles all communication with THE FORGE backend
+ * @file This file contains the API service for "THE LENS" frontend, which handles all communication with "THE FORGE" backend.
+ * @author Paradroid AI
+ * @version 1.0.0
+ * 
+ * @description This service provides a set of functions for interacting with the backend API.
+ * It includes functions for performing CRUD operations on projects, starting and managing content generation with Server-Sent Events, and checking the server's health and status.
  */
 
 // --- Project CRUD Operations ---
 
 /**
- * Fetch all projects from THE FORGE backend
- * 
- * Retrieves a complete list of all projects stored on the server.
- * Used to populate the project list in the sidebar.
- * 
- * @returns {Promise<Array<Object>>} Promise resolving to array of project objects
- * @throws {Error} When the fetch request fails or server returns an error
+ * Fetches a complete list of all projects from the backend.
+ * This function is used to populate the project list in the application's sidebar.
+ *
+ * @returns {Promise<Array<Object>>} A Promise that resolves to an array of project objects.
+ * @throws {Error} Throws an error if the fetch request fails or the server returns an error response.
  */
 export async function fetchProjects() {
     const response = await fetch(`${API_URL}/projects`);
@@ -23,15 +25,13 @@ export async function fetchProjects() {
 }
 
 /**
- * Create a new project with specified name and framework
- * 
- * Sends a POST request to create a new project. The server will generate
- * a unique ID and initialize default values for the project.
- * 
- * @param {string} name - The project name
- * @param {string} framework - Framework type (PROJECT_DEEPDIVE, PROJECT_SYNTHETIC, PROJECT_BENCHMARK)
- * @returns {Promise<Object>} Promise resolving to the created project object
- * @throws {Error} When project creation fails or validation errors occur
+ * Creates a new project with a specified name and framework.
+ * This function sends a POST request to the backend, where a unique ID and default values will be generated for the new project.
+ *
+ * @param {string} name - The name of the new project.
+ * @param {string} framework - The framework type for the new project (e.g., PROJECT_DEEPDIVE).
+ * @returns {Promise<Object>} A Promise that resolves to the newly created project object.
+ * @throws {Error} Throws an error if the project creation fails or if there are validation errors.
  */
 export async function createProject(name, framework) {
     const response = await fetch(`${API_URL}/projects`, {
@@ -44,15 +44,14 @@ export async function createProject(name, framework) {
 }
 
 /**
- * Update an existing project with new data
- * 
- * Sends partial or complete project updates to the server. Only the fields
- * provided in the updates object will be modified. The project ID cannot be changed.
- * 
- * @param {string} projectId - Unique identifier of the project to update
- * @param {Object} updates - Object containing the fields to update
- * @returns {Promise<Object>} Promise resolving to the updated project object
- * @throws {Error} When update fails or project is not found
+ * Updates an existing project with new data.
+ * This function sends a PUT request to the backend with the fields to be updated.
+ * Only the fields provided in the `updates` object will be modified. The project ID cannot be changed.
+ *
+ * @param {string} projectId - The unique identifier of the project to update.
+ * @param {Object} updates - An object containing the fields to be updated.
+ * @returns {Promise<Object>} A Promise that resolves to the updated project object.
+ * @throws {Error} Throws an error if the update fails or if the project is not found.
  */
 export async function updateProject(projectId, updates) {
     const response = await fetch(`${API_URL}/projects/${projectId}`, {
@@ -65,14 +64,12 @@ export async function updateProject(projectId, updates) {
 }
 
 /**
- * Delete a project permanently
- * 
- * Removes a project from the server's memory. This action cannot be undone.
- * The project and all associated data will be lost.
- * 
- * @param {string} projectId - Unique identifier of the project to delete
- * @returns {Promise<void>} Promise resolving when deletion is complete
- * @throws {Error} When deletion fails or project is not found
+ * Permanently deletes a project from the backend.
+ * This action is irreversible and will remove the project and all its associated data.
+ *
+ * @param {string} projectId - The unique identifier of the project to delete.
+ * @returns {Promise<void>} A Promise that resolves when the deletion is complete.
+ * @throws {Error} Throws an error if the deletion fails or if the project is not found.
  */
 export async function deleteProject(projectId) {
     const response = await fetch(`${API_URL}/projects/${projectId}`, {
@@ -84,12 +81,14 @@ export async function deleteProject(projectId) {
 // --- Generation Operations ---
 
 /**
- * Start content generation with Server-Sent Events streaming
- * @param {Object} project - Project object
- * @param {Function} onProgress - Callback for progress updates
- * @param {Function} onComplete - Callback when generation completes
- * @param {Function} onError - Callback for errors
- * @returns {EventSource} EventSource instance for cancellation
+ * Starts the content generation process for a project using Server-Sent Events (SSE) for real-time updates.
+ * This function handles the entire lifecycle of the generation stream, including starting the connection, processing incoming data, and handling errors with a retry mechanism.
+ *
+ * @param {Object} project - The project object for which to generate content.
+ * @param {Function} onProgress - A callback function that is invoked with progress updates.
+ * @param {Function} onComplete - A callback function that is invoked when the generation is complete.
+ * @param {Function} onError - A callback function that is invoked when an error occurs.
+ * @returns {Function} A `cleanup` function that can be called to manually cancel the generation stream.
  */
 export function startGeneration(project, onProgress, onComplete, onError) {
     // Track the active stream reader for cleanup
@@ -291,14 +290,12 @@ export function startGeneration(project, onProgress, onComplete, onError) {
 }
 
 /**
- * Check the status of content generation for a project
- * 
- * Queries the server to determine if generation is currently active
- * for a specific project, along with timing information.
- * 
- * @param {string} projectId - Unique identifier of the project
- * @returns {Promise<Object>} Promise resolving to status object with active flag, status, timing
- * @throws {Error} When status check fails
+ * Checks the status of the content generation process for a specific project.
+ * This function queries the backend to determine if a generation is currently active and to get its timing information.
+ *
+ * @param {string} projectId - The unique identifier of the project to check.
+ * @returns {Promise<Object>} A Promise that resolves to a status object, which includes an `active` flag and other status information.
+ * @throws {Error} Throws an error if the status check fails.
  */
 export async function checkGenerationStatus(projectId) {
     const response = await fetch(`${API_URL}/generate/${projectId}/status`);
@@ -307,14 +304,12 @@ export async function checkGenerationStatus(projectId) {
 }
 
 /**
- * Cancel active content generation for a project
- * 
- * Sends a request to stop any ongoing generation process for the specified project.
- * This will terminate the streaming and clean up server resources.
- * 
- * @param {string} projectId - Unique identifier of the project
- * @returns {Promise<Object>} Promise resolving to cancellation confirmation
- * @throws {Error} When cancellation fails or no active generation found
+ * Cancels an active content generation process for a specific project.
+ * This function sends a DELETE request to the backend to stop the ongoing generation and clean up server resources.
+ *
+ * @param {string} projectId - The unique identifier of the project for which to cancel generation.
+ * @returns {Promise<Object>} A Promise that resolves to a confirmation message from the server.
+ * @throws {Error} Throws an error if the cancellation fails or if no active generation is found.
  */
 export async function cancelGeneration(projectId) {
     const response = await fetch(`${API_URL}/generate/${projectId}`, {
@@ -325,16 +320,14 @@ export async function cancelGeneration(projectId) {
 }
 
 /**
- * Update a project with newly generated content and metadata
- * 
- * Convenience function to save generated content and its associated metadata
- * to a project. Updates both the content and generation metadata fields.
- * 
- * @param {string} projectId - Unique identifier of the project
- * @param {string} content - The generated content text
- * @param {Object} metadata - Generation metadata (word count, timing, validation, etc.)
- * @returns {Promise<Object>} Promise resolving to the updated project object
- * @throws {Error} When update fails or project is not found
+ * A convenience function to update a project with newly generated content and its associated metadata.
+ * This function updates both the `generatedContent` and `generationMetadata` fields of the project.
+ *
+ * @param {string} projectId - The unique identifier of the project to update.
+ * @param {string} content - The generated content to be saved.
+ * @param {Object} metadata - The metadata associated with the generation process.
+ * @returns {Promise<Object>} A Promise that resolves to the updated project object.
+ * @throws {Error} Throws an error if the update fails or if the project is not found.
  */
 export async function updateProjectWithGeneratedContent(projectId, content, metadata) {
     const response = await fetch(`${API_URL}/projects/${projectId}`, {
@@ -352,13 +345,11 @@ export async function updateProjectWithGeneratedContent(projectId, content, meta
 // --- Server Status ---
 
 /**
- * Check THE FORGE server health and configuration status
- * 
- * Retrieves server operational status, project count, and API configuration status.
- * Used for health monitoring and troubleshooting connectivity issues.
- * 
- * @returns {Promise<Object>} Promise resolving to server status object
- * @throws {Error} When server status check fails or server is unreachable
+ * Checks the health and configuration status of the backend server.
+ * This function is used for health monitoring and for troubleshooting connectivity issues.
+ *
+ * @returns {Promise<Object>} A Promise that resolves to a server status object.
+ * @throws {Error} Throws an error if the server status check fails or if the server is unreachable.
  */
 export async function checkServerStatus() {
     const response = await fetch(`${API_URL}/status`);

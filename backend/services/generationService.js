@@ -3,10 +3,20 @@ const { constructPrompt, getFrameworkMetadata } = require('./frameworkService');
 const { validateOutput } = require('./validationService');
 
 /**
- * Generate content for a project
- * @param {Object} project - The project object
- * @param {Function} onProgress - Callback for progress updates
- * @returns {Promise<Object>} Generation result with content and metadata
+ * Generates content for a given project by constructing a prompt, streaming the output from the Gemini API, and validating the result.
+ * This function orchestrates the entire content generation process, from input validation to final output.
+ *
+ * @param {Object} project - The project object containing all necessary data for generation.
+ * @param {string} project.framework - The framework type for the generation (e.g., PROJECT_DEEPDIVE).
+ * @param {string} project.sourceContext - The source text or context to be used as input for the generation.
+ * @param {string} project.name - The name of the project.
+ * @param {Function} onProgress - A callback function that is invoked with progress updates during the generation process.
+ * The updates are sent as objects with a `type` property (e.g., 'progress', 'complete', 'error').
+ *
+ * @returns {Promise<Object>} A Promise that resolves to an object containing the generated content and its metadata.
+ * The resolved object includes the generated text, framework information, word count, generation time, and validation results.
+ *
+ * @throws {Error} Throws an error if the source context is missing, the framework is invalid, or the generation process fails.
  */
 async function generateContent(project, onProgress) {
     const { framework, sourceContext, name } = project;
@@ -96,20 +106,25 @@ async function generateContent(project, onProgress) {
 }
 
 /**
- * Count words in text
- * @param {string} text - Text to count
- * @returns {number} Word count
+ * Counts the number of words in a given string of text.
+ * Words are separated by one or more whitespace characters.
+ * 
+ * @param {string} text - The text in which to count the words.
+ * @returns {number} The total number of words in the text.
  */
 function countWords(text) {
     return text.trim().split(/\s+/).filter(word => word.length > 0).length;
 }
 
 /**
- * Estimate time remaining for generation with robust edge case handling
- * @param {number} currentWords - Current word count
- * @param {number} targetWords - Target word count
- * @param {number} elapsedSeconds - Time elapsed so far
- * @returns {number} Estimated seconds remaining
+ * Estimates the remaining time for a content generation task based on the current progress.
+ * This function includes robust handling for edge cases, such as invalid inputs, no progress, and very slow generation rates.
+ * 
+ * @param {number} currentWords - The number of words that have been generated so far.
+ * @param {number} targetWords - The target number of words for the generation.
+ * @param {number} elapsedSeconds - The total time in seconds that has elapsed since the generation started.
+ * 
+ * @returns {number} The estimated time remaining in seconds. Returns 0 if the generation is complete or if the inputs are invalid.
  */
 function estimateTimeRemaining(currentWords, targetWords, elapsedSeconds) {
     // Input validation

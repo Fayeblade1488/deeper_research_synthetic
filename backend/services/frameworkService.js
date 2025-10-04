@@ -31,10 +31,16 @@ const FRAMEWORK_TYPES = {
 };
 
 /**
- * Load framework prompt from file with security validation
- * @param {string} frameworkType - The framework type (PROJECT_DEEPDIVE, etc.)
- * @returns {Promise<string>} Framework prompt content
- * @throws {Error} When framework type is invalid or file cannot be loaded securely
+ * Loads the prompt content for a specified framework from a file.
+ * This function includes several security checks to prevent path traversal and other file-based vulnerabilities.
+ * It validates the framework type, ensures the file path is within the allowed directory, and checks that the file is a valid, non-empty file.
+ *
+ * @param {string} frameworkType - The type of the framework to load (e.g., PROJECT_DEEPDIVE).
+ * This must be a key in the `FRAMEWORK_TYPES` object.
+ *
+ * @returns {Promise<string>} A Promise that resolves to the content of the framework's prompt file.
+ *
+ * @throws {Error} Throws an error if the framework type is invalid, the prompt file cannot be found, or a security violation is detected.
  */
 async function loadFrameworkPrompt(frameworkType) {
     // Strict input validation
@@ -92,11 +98,15 @@ async function loadFrameworkPrompt(frameworkType) {
 }
 
 /**
- * Construct full prompt for generation
- * @param {string} frameworkType - The framework type
- * @param {string} sourceContext - User-provided source material
- * @param {string} userQuery - Optional user query/instructions
- * @returns {Promise<string>} Complete prompt for Gemini
+ * Constructs the full prompt to be sent to the Gemini API for content generation.
+ * This function combines the framework-specific prompt with the user-provided source context and an optional user query.
+ * If no user query is provided, a default query is generated based on the framework's description.
+ *
+ * @param {string} frameworkType - The type of the framework to use for the prompt.
+ * @param {string} sourceContext - The user-provided source material or context for the generation.
+ * @param {string} [userQuery=''] - An optional, additional query or instruction from the user.
+ *
+ * @returns {Promise<string>} A Promise that resolves to the complete, formatted prompt string.
  */
 async function constructPrompt(frameworkType, sourceContext, userQuery = '') {
     const frameworkPrompt = await loadFrameworkPrompt(frameworkType);
@@ -128,18 +138,20 @@ async function constructPrompt(frameworkType, sourceContext, userQuery = '') {
 }
 
 /**
- * Get framework metadata
- * @param {string} frameworkType - The framework type
- * @returns {Object} Framework metadata
+ * Retrieves the metadata for a specific framework type.
+ * 
+ * @param {string} frameworkType - The type of the framework for which to retrieve metadata.
+ * @returns {Object | null} An object containing the framework's metadata (name, outputType, promptFile, minWords, description), or `null` if the framework type is invalid.
  */
 function getFrameworkMetadata(frameworkType) {
     return FRAMEWORK_TYPES[frameworkType] || null;
 }
 
 /**
- * Validate framework type
- * @param {string} frameworkType - The framework type to validate
- * @returns {boolean} True if valid
+ * Validates whether a given framework type is a valid, known framework.
+ * 
+ * @param {string} frameworkType - The framework type to validate.
+ * @returns {boolean} Returns `true` if the framework type is valid, otherwise `false`.
  */
 function isValidFramework(frameworkType) {
     return frameworkType in FRAMEWORK_TYPES;

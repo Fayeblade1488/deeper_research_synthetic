@@ -1,0 +1,70 @@
+# YAML Lint Configuration for People YAML Files
+# Ensures compliance with People YAML 3.0.0 standard
+
+# Basic structure requirements
+required_fields:
+  - "name"
+  - "version" 
+  - "type"
+  - "description"
+  - "identity"
+
+# Version must be 3.0.0 for People YAML standard
+version_requirement:
+  pattern: "^3\\.0\\.0$"
+  explanation: "Must comply with People YAML 3.0.0 standard"
+
+# Field types
+field_types:
+  name: "string"
+  version: "string"
+  type: "string"
+  description: "string"
+  identity: "object"
+  capabilities: "array"
+  planning_phases: "object"
+  protocols: "array"
+  mission: "array"
+  standards: "array"
+  constraints: "array"
+
+# Identity object requirements
+identity_required_fields:
+  - "role"
+  - "purpose"
+  - "methodology"
+
+# Planning phases requirements (when present)
+planning_phase_requirements:
+  required_subfields:
+    - "name"
+    - "description"
+    - "actions"
+    - "checklist"
+  optional_subfields:
+    - "verbalize"
+    - "tasks"
+
+# Type validation
+array_items_type:
+  capabilities: "string"
+  protocols: "string"
+  mission: "string"
+  standards: "string"
+  constraints: "string"
+  planning_phases.*.actions: "string"
+  planning_phases.*.checklist: "string"
+  planning_phases.*.tasks: "string"
+
+# Naming conventions
+naming_conventions:
+  file_pattern: "^[a-z0-9_-]+\\.yaml$"
+  field_naming: "snake_case"
+
+# Documentation requirements
+documentation_fields:
+  recommended:
+    - "preamble"
+    - "description"
+    - "capabilities"
+    - "mission"
