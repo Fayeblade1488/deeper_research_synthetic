@@ -65,13 +65,32 @@ function DraftPanel({ project, content, isGenerating, title = "Generated Content
                 </h3>
             </div>
             <div className="panel-content">
-                <p>{description}</p>
+                <p style={{ color: 'var(--dracula-foreground)' }}>{description}</p>
                 <div className="draft-content-wrapper">
                     {isGenerating && (
-                        <div className="generating-overlay">
-                            <div className="generating-indicator">
+                        <div className="generating-overlay" style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: 'rgba(30, 31, 41, 0.8)',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            zIndex: 10,
+                            borderRadius: '6px'
+                        }}>
+                            <div className="generating-indicator" style={{
+                                backgroundColor: 'var(--dracula-selection)',
+                                padding: '1rem 1.5rem',
+                                borderRadius: '6px',
+                                border: '1px solid var(--dracula-divider)',
+                                fontWeight: '500',
+                                color: 'var(--dracula-foreground)'
+                            }}>
                                 <div>⏳ Generating content...</div>
-                                <div style={{ fontSize: '0.9em', marginTop: '8px', color: '#95a5a6' }}>
+                                <div style={{ fontSize: '0.9em', marginTop: '8px', color: 'var(--dracula-comment)' }}>
                                     AI is crafting your content. This may take a few moments.
                                 </div>
                             </div>
@@ -87,17 +106,48 @@ function DraftPanel({ project, content, isGenerating, title = "Generated Content
                         onKeyDown={handleKeyDown}
                         placeholder="Generated content will appear here. You can edit this content directly, and changes will be saved automatically."
                         className={`draft-content ${isGenerating ? 'generating' : ''}`}
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            border: '1px solid var(--dracula-divider)',
+                            borderRadius: '8px',
+                            padding: '16px',
+                            fontFamily: 'inherit',
+                            fontSize: '1rem',
+                            resize: 'none',
+                            backgroundColor: 'var(--dracula-background)',
+                            color: 'var(--dracula-foreground)',
+                            lineHeight: '1.6'
+                        }}
                     />
                 </div>
                 {isEditing && (
-                    <div className="save-indicator" style={{ marginTop: '10px' }}>
+                    <div className="save-indicator" style={{ 
+                        marginTop: '10px',
+                        backgroundColor: 'var(--dracula-card)',
+                        borderRadius: '6px',
+                        borderLeft: '3px solid var(--dracula-purple)',
+                        color: 'var(--dracula-foreground)',
+                        padding: '8px'
+                    }}>
                         <button 
                             className="btn-primary" 
                             onClick={handleSave}
+                            style={{ 
+                                marginTop: '10px',
+                                backgroundColor: 'var(--dracula-purple)',
+                                color: 'var(--dracula-background)',
+                                border: 'none',
+                                padding: '10px 20px',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                fontSize: '1rem',
+                                fontWeight: '500'
+                            }}
                         >
                             Save Draft
                         </button>
-                        <small style={{ display: 'block', marginTop: '5px', color: '#7f8c8d' }}>
+                        <small style={{ display: 'block', marginTop: '5px', color: 'var(--dracula-comment)' }}>
                             Press Cmd/Ctrl+S to save
                         </small>
                     </div>

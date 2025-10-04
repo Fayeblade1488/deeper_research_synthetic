@@ -63,7 +63,7 @@ function SourcePanel({ project, title = "Source Context", description = "Enter s
                 </h3>
             </div>
             <div className="panel-content">
-                <p>{description}</p>
+                <p style={{ color: 'var(--dracula-foreground)' }}>{description}</p>
                 <textarea
                     value={sourceContext}
                     onChange={(e) => {
@@ -74,17 +74,40 @@ function SourcePanel({ project, title = "Source Context", description = "Enter s
                     onKeyDown={handleKeyDown}
                     placeholder="Enter your source material here. This will be used as input for the AI generation process. You can include research data, notes, questions, or any other relevant information."
                     className="source-input"
+                    style={{
+                        backgroundColor: 'var(--dracula-background)',
+                        color: 'var(--dracula-foreground)',
+                        border: '1px solid var(--dracula-divider)',
+                        borderRadius: '8px',
+                        padding: '16px',
+                        fontFamily: 'inherit',
+                        fontSize: '1rem',
+                        resize: 'none',
+                        height: 'calc(100% - 40px)',
+                        width: 'calc(100% - 32px)',
+                        outline: 'none'
+                    }}
                 />
                 {isEditing && (
-                    <div className="save-indicator">
+                    <div className="save-indicator" style={{ marginTop: '10px' }}>
                         <button 
                             className="btn-primary" 
                             onClick={handleSave}
-                            style={{ marginTop: '10px' }}
+                            style={{ 
+                                marginTop: '10px',
+                                backgroundColor: 'var(--dracula-purple)',
+                                color: 'var(--dracula-background)',
+                                border: 'none',
+                                padding: '10px 20px',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                fontSize: '1rem',
+                                fontWeight: '500'
+                            }}
                         >
                             Save Source Context
                         </button>
-                        <small style={{ display: 'block', marginTop: '5px', color: '#7f8c8d' }}>
+                        <small style={{ display: 'block', marginTop: '5px', color: 'var(--dracula-comment)' }}>
                             Press Cmd/Ctrl+S to save
                         </small>
                     </div>

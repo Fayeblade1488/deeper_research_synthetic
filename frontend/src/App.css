@@ -1,17 +1,42 @@
 :root {
-  --primary-color: #3498db;
+  /* Dracula theme colors */
+  --dracula-background: #1e1f29;
+  --dracula-foreground: #f6f7ee;
+  --dracula-selection: #343648;
+  --dracula-comment: #5d6ca8;
+  --dracula-red: #fc3c44;
+  --dracula-orange: #fdaa59;
+  --dracula-yellow: #eefd7a;
+  --dracula-green: #48ff68;
+  --dracula-purple: #ae79f8;
+  --dracula-cyan: #7ce4fc;
+  --dracula-pink: #fc5db9;
+  --dracula-accent: #ae79f8;
+  --dracula-sidebar: #181921;
+  --dracula-toolbar: #16171e;
+  --dracula-divider: #2d2e37;
+  --dracula-card: #252632;
+  --dracula-insertion-point: #f6f7ee;
+  --dracula-inactive-segment: #181921;
+  --dracula-active-segment: #1e1f29;
+  --dracula-active-segment-text: #f6f7ee;
+  --dracula-mouse-over-segment: #1e1f29;
+  --dracula-selected-content: #5b3e89;
+
+  /* Original theme colors (for fallbacks) */
+  --primary-color: var(--dracula-cyan);
   --primary-dark: #2980b9;
-  --secondary-color: #9b59b6;
-  --success-color: #2ecc71;
-  --warning-color: #f39c12;
-  --danger-color: #e74c3c;
-  --dark-bg: #2c3e50;
-  --darker-bg: #1a252f;
-  --light-bg: #f8f9fa;
-  --card-bg: #ffffff;
-  --text-primary: #2c3e50;
-  --text-secondary: #7f8c8d;
-  --border-color: #e0e0e0;
+  --secondary-color: var(--dracula-purple);
+  --success-color: var(--dracula-green);
+  --warning-color: var(--dracula-orange);
+  --danger-color: var(--dracula-red);
+  --dark-bg: var(--dracula-sidebar);
+  --darker-bg: var(--dracula-toolbar);
+  --light-bg: var(--dracula-card);
+  --card-bg: var(--dracula-card);
+  --text-primary: var(--dracula-foreground);
+  --text-secondary: var(--dracula-comment);
+  --border-color: var(--dracula-divider);
   --sidebar-width: 320px;
   --transition: all 0.3s ease;
 }
@@ -29,8 +54,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
-  background-color: var(--light-bg);
-  color: var(--text-primary);
+  background-color: var(--dracula-background);
+  color: var(--dracula-foreground);
 }
 
 .app-container {
@@ -43,13 +68,13 @@ body {
 /* Sidebar Styles */
 .sidebar {
   width: var(--sidebar-width);
-  background: linear-gradient(135deg, var(--dark-bg), var(--darker-bg));
-  color: white;
+  background: linear-gradient(135deg, var(--dracula-sidebar), var(--dracula-toolbar));
+  color: var(--dracula-foreground);
   display: flex;
   flex-direction: column;
   padding: 20px;
   overflow-y: auto;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid var(--dracula-divider);
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -454,14 +479,14 @@ body {
   left: 0;
   right: 0;
   height: 32px;
-  background: linear-gradient(90deg, var(--dark-bg), var(--darker-bg));
-  color: white;
+  background: linear-gradient(90deg, var(--dracula-sidebar), var(--dracula-toolbar));
+  color: var(--dracula-foreground);
   display: flex;
   align-items: center;
   padding: 0 16px;
   font-size: 0.8rem;
   z-index: 100;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--dracula-divider);
 }
 
 .status-item {
@@ -488,8 +513,8 @@ body {
 }
 
 .project-count {
-  background: var(--primary-color);
-  color: white;
+  background: var(--dracula-purple);
+  color: var(--dracula-foreground);
   border-radius: 12px;
   padding: 2px 8px;
   font-size: 0.8rem;
@@ -498,7 +523,7 @@ body {
 
 .app-subtitle {
   font-size: 0.85rem;
-  color: #bdc3c7;
+  color: var(--dracula-comment);
   font-weight: 300;
   margin-top: 4px;
 }
@@ -510,7 +535,7 @@ body {
 
 .project-updated {
   font-size: 0.75rem;
-  color: #95a5a6;
+  color: var(--dracula-comment);
   margin-top: 4px;
 }
 
@@ -527,18 +552,21 @@ body {
 }
 
 .info-item.deepdive {
-  background-color: rgba(52, 152, 219, 0.1);
-  border-left: 3px solid var(--primary-color);
+  background-color: var(--dracula-cyan);
+  color: var(--dracula-background);
+  border-left: 3px solid var(--dracula-cyan);
 }
 
 .info-item.synthetic {
-  background-color: rgba(155, 89, 182, 0.1);
-  border-left: 3px solid var(--secondary-color);
+  background-color: var(--dracula-purple);
+  color: var(--dracula-background);
+  border-left: 3px solid var(--dracula-purple);
 }
 
 .info-item.benchmark {
-  background-color: rgba(243, 156, 18, 0.1);
-  border-left: 3px solid var(--warning-color);
+  background-color: var(--dracula-orange);
+  color: var(--dracula-background);
+  border-left: 3px solid var(--dracula-orange);
 }
 
 /* Responsive Design */

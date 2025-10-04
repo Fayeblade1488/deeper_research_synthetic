@@ -165,6 +165,23 @@ function GenerationControlPanel({ project, onGenerationComplete, onGenerationSta
                             onClick={handleGenerate}
                             disabled={isGenerating}
                             title={isGenerating ? "Generation in progress" : "Start content generation"}
+                            style={{
+                                backgroundColor: 'var(--dracula-green)',
+                                color: 'var(--dracula-background)',
+                                border: 'none',
+                                padding: '16px 32px',
+                                borderRadius: '50px',
+                                fontSize: '1.1rem',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                transition: 'var(--transition)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                boxShadow: '0 4px 15px rgba(72, 255, 104, 0.3)',
+                                minWidth: '200px',
+                                justifyContent: 'center'
+                            }}
                         >
                             {isGenerating ? (
                                 <>
@@ -183,6 +200,19 @@ function GenerationControlPanel({ project, onGenerationComplete, onGenerationSta
                                 onClick={handleCancel}
                                 disabled={isCancelling}
                                 title="Cancel generation"
+                                style={{
+                                    backgroundColor: 'var(--dracula-red)',
+                                    color: 'var(--dracula-foreground)',
+                                    border: 'none',
+                                    padding: '12px 24px',
+                                    borderRadius: '8px',
+                                    fontSize: '1rem',
+                                    cursor: 'pointer',
+                                    transition: 'var(--transition)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
                             >
                                 {isCancelling ? (
                                     <>
@@ -197,10 +227,25 @@ function GenerationControlPanel({ project, onGenerationComplete, onGenerationSta
                         )}
                     </div>
                     
-                    <div className="generation-status">
-                        <div className={`status-indicator ${isGenerating ? 'generating' : 'active'}`}>
+                    <div className="generation-status" style={{
+                        width: '100%',
+                        textAlign: 'center',
+                        padding: '16px',
+                        borderRadius: '8px',
+                        backgroundColor: 'var(--dracula-card)',
+                        marginTop: '16px',
+                        color: 'var(--dracula-foreground)'
+                    }}>
+                        <div className={`status-indicator ${isGenerating ? 'generating' : 'active'}`} style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            fontWeight: '500',
+                            color: isGenerating ? 'var(--dracula-orange)' : (validationResults?.valid ? 'var(--dracula-green)' : 'var(--dracula-foreground)')
+                        }}>
                             <span role="img" aria-label={isGenerating ? 'generating' : 'ready'}>
-                                {isGenerating ? '⏳' : '✅'}
+                                {isGenerating ? '⏳' : (validationResults?.valid ? '✅' : 'ℹ️')}
                             </span>
                             <span>{statusMessage}</span>
                         </div>
@@ -209,27 +254,88 @@ function GenerationControlPanel({ project, onGenerationComplete, onGenerationSta
                     {isGenerating && (
                         <div className="generation-progress">
                             <div className="progress-bar-container">
-                                <div className="progress-bar">
+                                <div className="progress-bar" style={{
+                                    width: '100%',
+                                    height: '12px',
+                                    backgroundColor: 'var(--dracula-divider)',
+                                    borderRadius: '6px',
+                                    overflow: 'hidden'
+                                }}>
                                     <div 
                                         className="progress-fill" 
-                                        style={{ width: `${progressPercentage}%` }}
+                                        style={{ 
+                                            height: '100%', 
+                                            backgroundColor: 'var(--dracula-purple)',
+                                            transition: 'width 0.3s ease',
+                                            width: `${progressPercentage}%`
+                                        }}
                                     ></div>
                                 </div>
-                                <span className="progress-percent">{Math.round(progressPercentage)}%</span>
+                                <span className="progress-percent" style={{ 
+                                    minWidth: '40px', 
+                                    textAlign: 'right', 
+                                    fontSize: '0.9rem', 
+                                    color: 'var(--dracula-foreground)' 
+                                }}>{Math.round(progressPercentage)}%</span>
                             </div>
                             
-                            <div className="progress-stats">
-                                <div className="stat">
-                                    <div className="label">Words</div>
-                                    <div className="value">{wordCount}</div>
+                            <div className="progress-stats" style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+                                gap: '16px',
+                                width: '100%',
+                                marginTop: '20px'
+                            }}>
+                                <div className="stat" style={{
+                                    textAlign: 'center',
+                                    padding: '16px',
+                                    backgroundColor: 'var(--dracula-card)',
+                                    borderRadius: '8px'
+                                }}>
+                                    <div className="label" style={{
+                                        fontSize: '0.7rem',
+                                        color: 'var(--dracula-comment)',
+                                        marginBottom: '0.25rem'
+                                    }}>Words</div>
+                                    <div className="value" style={{
+                                        fontWeight: '500',
+                                        fontSize: '0.9rem',
+                                        color: 'var(--dracula-purple)'
+                                    }}>{wordCount}</div>
                                 </div>
-                                <div className="stat">
-                                    <div className="label">Time</div>
-                                    <div className="value">{duration.toFixed(1)}s</div>
+                                <div className="stat" style={{
+                                    textAlign: 'center',
+                                    padding: '16px',
+                                    backgroundColor: 'var(--dracula-card)',
+                                    borderRadius: '8px'
+                                }}>
+                                    <div className="label" style={{
+                                        fontSize: '0.7rem',
+                                        color: 'var(--dracula-comment)',
+                                        marginBottom: '0.25rem'
+                                    }}>Time</div>
+                                    <div className="value" style={{
+                                        fontWeight: '500',
+                                        fontSize: '0.9rem',
+                                        color: 'var(--dracula-purple)'
+                                    }}>{duration.toFixed(1)}s</div>
                                 </div>
-                                <div className="stat">
-                                    <div className="label">Status</div>
-                                    <div className="value">{isGenerating ? 'Active' : 'Idle'}</div>
+                                <div className="stat" style={{
+                                    textAlign: 'center',
+                                    padding: '16px',
+                                    backgroundColor: 'var(--dracula-card)',
+                                    borderRadius: '8px'
+                                }}>
+                                    <div className="label" style={{
+                                        fontSize: '0.7rem',
+                                        color: 'var(--dracula-comment)',
+                                        marginBottom: '0.25rem'
+                                    }}>Status</div>
+                                    <div className="value" style={{
+                                        fontWeight: '500',
+                                        fontSize: '0.9rem',
+                                        color: 'var(--dracula-purple)'
+                                    }}>{isGenerating ? 'Active' : 'Idle'}</div>
                                 </div>
                             </div>
                         </div>
@@ -237,10 +343,19 @@ function GenerationControlPanel({ project, onGenerationComplete, onGenerationSta
                 </div>
                 
                 {validationResults && (
-                    <div className="validation-results">
-                        <h4>Validation Results</h4>
+                    <div className="validation-results" style={{
+                        marginTop: '20px',
+                        paddingTop: '20px',
+                        borderTop: '1px solid var(--dracula-divider)'
+                    }}>
+                        <h4 style={{ 
+                            marginBottom: '12px', 
+                            color: 'var(--dracula-foreground)' 
+                        }}>Validation Results</h4>
                         <div className="validation-summary">
-                            <div className="validation-success">
+                            <div className="validation-success" style={{
+                                color: validationResults.valid ? 'var(--dracula-green)' : 'var(--dracula-red)'
+                            }}>
                                 {validationResults.valid ? (
                                     <span role="img" aria-label="success">✅</span>
                                 ) : (
@@ -251,14 +366,34 @@ function GenerationControlPanel({ project, onGenerationComplete, onGenerationSta
                         </div>
                         
                         {(validationResults.errors.length > 0 || validationResults.warnings.length > 0) && (
-                            <ul>
+                            <ul style={{
+                                margin: '0.5rem 0 0 1rem',
+                                padding: '0 0 0 0.5rem',
+                                listStyle: 'none'
+                            }}>
                                 {validationResults.errors.map((error, index) => (
-                                    <li key={`error-${index}`} className="error">
+                                    <li key={`error-${index}`} className="error" style={{
+                                        padding: '6px 0',
+                                        display: 'flex',
+                                        alignItems: 'flex-start',
+                                        gap: '8px',
+                                        color: 'var(--dracula-red)',
+                                        fontSize: '0.8rem',
+                                        margin: '0.25rem 0'
+                                    }}>
                                         <span role="img" aria-label="error">❌</span> {error}
                                     </li>
                                 ))}
                                 {validationResults.warnings.map((warning, index) => (
-                                    <li key={`warning-${index}`} className="warning">
+                                    <li key={`warning-${index}`} className="warning" style={{
+                                        padding: '6px 0',
+                                        display: 'flex',
+                                        alignItems: 'flex-start',
+                                        gap: '8px',
+                                        color: 'var(--dracula-orange)',
+                                        fontSize: '0.8rem',
+                                        margin: '0.25rem 0'
+                                    }}>
                                         <span role="img" aria-label="warning">⚠️</span> {warning}
                                     </li>
                                 ))}
