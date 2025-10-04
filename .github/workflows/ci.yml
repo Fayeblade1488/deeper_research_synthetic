@@ -118,7 +118,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage-${{ matrix.node-version }}
-          path: frontend/coverage/
+          path: coverage/
           if-no-files-found: ignore
           retention-days: 7
 
