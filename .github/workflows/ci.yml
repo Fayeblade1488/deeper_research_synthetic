@@ -9,7 +9,7 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 defaults:
   run:
@@ -19,6 +19,9 @@ jobs:
   test-backend:
     name: Backend Tests (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
     strategy:
       fail-fast: false
       matrix:
@@ -57,23 +60,26 @@ jobs:
       - name: Upload backend coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          file: coverage/lcov.info
+          files: ./backend/coverage/lcov.info
           flags: backend
           name: backend-coverage
           fail_ci_if_error: false
 
       - name: Upload test reports
-        if: always() && (hashFiles('**/coverage/**') != '')
+        if: always() && (hashFiles('backend/coverage/**') != '')
         uses: actions/upload-artifact@v4
         with:
           name: backend-coverage-${{ matrix.node-version }}
-          path: coverage/
+          path: backend/coverage/
           if-no-files-found: ignore
           retention-days: 7
 
   test-frontend:
     name: Frontend Tests (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
     strategy:
       fail-fast: false
       matrix:
@@ -108,11 +114,11 @@ jobs:
           CI: "true"
 
       - name: Upload test reports
-        if: always() && (hashFiles('**/coverage/**') != '')
+        if: always() && (hashFiles('frontend/coverage/**') != '')
         uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage-${{ matrix.node-version }}
-          path: coverage/
+          path: frontend/coverage/
           if-no-files-found: ignore
           retention-days: 7
 
@@ -120,13 +126,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-dist-${{ matrix.node-version }}
-          path: dist/
+          path: frontend/dist/
           if-no-files-found: ignore
           retention-days: 7
 
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     
     steps:
       - name: Checkout
@@ -139,7 +148,7 @@ jobs:
           cache: npm
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.30.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -178,11 +187,9 @@ jobs:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
       security-events: write
-    concurrency:
-      group: codeql-${{ github.ref }}
-      cancel-in-progress: true
     
     strategy:
       fail-fast: false
@@ -211,9 +218,9 @@ jobs:
     needs: [test-backend, test-frontend, security-scan]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
-    concurrency:
-      group: deploy-staging-${{ github.ref }}
-      cancel-in-progress: true
+    permissions:
+      contents: read
+      deployments: write
     environment:
       name: staging
       url: https://staging.deeperresearch.dev
@@ -232,9 +239,9 @@ jobs:
     needs: [test-backend, test-frontend, security-scan]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    concurrency:
-      group: deploy-production-${{ github.ref }}
-      cancel-in-progress: true
+    permissions:
+      contents: read
+      deployments: write
     environment:
       name: production
       url: https://deeperresearch.dev
