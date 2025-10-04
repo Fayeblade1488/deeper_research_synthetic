@@ -5,138 +5,184 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   test-backend:
+    name: Backend Tests (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
-    name: Backend Tests
-    
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [14.x, 16.x, 18.x]
+        node-version: [18.x, 20.x, 22.x]
+    defaults:
+      run:
+        working-directory: backend
     
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint || true
+
+      - name: Run tests
+        run: npm test --ignore-scripts
+        env:
+          GEMINI_API_KEY: test-api-key
+          NODE_ENV: test
+          CI: "true"
+
+      - name: Generate coverage report
+        run: npm run test:coverage || true
     
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        cache-dependency-path: backend/package-lock.json
-    
-    - name: Install backend dependencies
-      run: |
-        cd backend
-        npm ci
-    
-    - name: Run backend linting
-      run: |
-        cd backend
-        npm run lint || true
-    
-    - name: Run backend tests
-      run: |
-        cd backend
-        npm test
-      env:
-        GEMINI_API_KEY: test-api-key
-        NODE_ENV: test
-    
-    - name: Generate backend coverage report
-      run: |
-        cd backend
-        npm run test:coverage || true
-    
-    - name: Upload backend coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: backend/coverage/lcov.info
-        flags: backend
-        name: backend-coverage
-        fail_ci_if_error: false
+      - name: Upload backend coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: coverage/lcov.info
+          flags: backend
+          name: backend-coverage
+          fail_ci_if_error: false
+
+      - name: Upload test reports
+        if: always() && (hashFiles('**/coverage/**') != '')
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-${{ matrix.node-version }}
+          path: coverage/
+          if-no-files-found: ignore
+          retention-days: 7
 
   test-frontend:
+    name: Frontend Tests (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
-    name: Frontend Tests
-    
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [14.x, 16.x, 18.x]
+        node-version: [18.x, 20.x, 22.x]
+    defaults:
+      run:
+        working-directory: frontend
     
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
-    
-    - name: Install frontend dependencies
-      run: |
-        cd frontend
-        npm ci
-    
-    - name: Run frontend linting
-      run: |
-        cd frontend
-        npm run lint || true
-    
-    - name: Run frontend tests
-      run: |
-        cd frontend
-        npm test || true
-    
-    - name: Build frontend
-      run: |
-        cd frontend
-        npm run build
-    
-    - name: Upload frontend build artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: frontend-dist
-        path: frontend/dist/
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint || true
+
+      - name: Build frontend
+        run: npm run build --if-present
+
+      - name: Run tests
+        run: npm test --ignore-scripts || true
+        env:
+          CI: "true"
+
+      - name: Upload test reports
+        if: always() && (hashFiles('**/coverage/**') != '')
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage-${{ matrix.node-version }}
+          path: coverage/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload frontend build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist-${{ matrix.node-version }}
+          path: dist/
+          if-no-files-found: ignore
+          retention-days: 7
 
   security-scan:
-    runs-on: ubuntu-latest
     name: Security Scan
+    runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        scan-type: 'fs'
-        scan-ref: '.'
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-    
-    - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        sarif_file: 'trivy-results.sarif'
-    
-    - name: Run npm audit for backend
-      run: |
-        cd backend
-        npm audit --audit-level=high || true
-    
-    - name: Run npm audit for frontend
-      run: |
-        cd frontend
-        npm audit --audit-level=high || true
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: npm
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Run npm audit for backend
+        working-directory: backend
+        run: |
+          npm ci
+          npm audit --audit-level=high || true
+
+      - name: Run npm audit for frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm audit --audit-level=high || true
+          
+      - name: Upload audit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-reports
+          path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+          if-no-files-found: ignore
+          retention-days: 3
 
   codeql-analysis:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
     permissions:
-      actions: read
       contents: read
       security-events: write
+    concurrency:
+      group: codeql-${{ github.ref }}
+      cancel-in-progress: true
     
     strategy:
       fail-fast: false
@@ -144,52 +190,60 @@ jobs:
         language: [ 'javascript' ]
     
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
-      with:
-        languages: ${{ matrix.language }}
-    
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v2
-    
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
 
   deploy-staging:
+    name: Deploy to Staging
     needs: [test-backend, test-frontend, security-scan]
     runs-on: ubuntu-latest
-    name: Deploy to Staging
     if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Deploy to staging
-      run: |
-        echo "Deploying to staging environment"
-        # Add actual deployment steps here
-    
+    concurrency:
+      group: deploy-staging-${{ github.ref }}
+      cancel-in-progress: true
     environment:
       name: staging
       url: https://staging.deeperresearch.dev
-
-  deploy-production:
-    needs: [test-backend, test-frontend, security-scan]
-    runs-on: ubuntu-latest
-    name: Deploy to Production
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Deploy to production
-      run: |
-        echo "Deploying to production environment"
-        # Add actual deployment steps here
-    
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to staging
+        run: |
+          echo "Deploying to staging environment"
+          # Add actual deployment steps here
+
+  deploy-production:
+    name: Deploy to Production
+    needs: [test-backend, test-frontend, security-scan]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    concurrency:
+      group: deploy-production-${{ github.ref }}
+      cancel-in-progress: true
     environment:
       name: production
       url: https://deeperresearch.dev
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to production
+        run: |
+          echo "Deploying to production environment"
+          # Add actual deployment steps here
