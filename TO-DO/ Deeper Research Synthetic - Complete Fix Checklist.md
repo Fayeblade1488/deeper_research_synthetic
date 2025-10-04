@@ -1,8 +1,8 @@
-# Deeper Research Synthetic - Complete Fix Checklist
+# 🔧 Deeper Research Synthetic - Complete Fix Checklist
 
 **Repository:** [https://github.com/Fayeblade1488/deeper_research_synthetic](https://github.com/Fayeblade1488/deeper_research_synthetic)
 **CI/CD Issue:** [https://github.com/Fayeblade1488/deeper_research_synthetic/actions/runs/18242558351](https://github.com/Fayeblade1488/deeper_research_synthetic/actions/runs/18242558351)
-
+**Local Repo:**: [deeper_research_synthetic](file:///Users/super_user/Desktop/deeper_research_synthetic/)
 ---
 
 ## 📋 SECTION 1: CI/CD Pipeline Fixes
@@ -31,11 +31,11 @@
 - [ ] Create `frontend/jest.config.js` or `frontend/vitest.config.js`
 - [ ] Add testing library dependencies:
 
-```
+
 ```bash
 npm install --save-dev @testing-library/react @testing-library/jest-dom vitest jsdom
 ```
-```
+
 
 - [ ] Create `frontend/tests/setup.js` for test environment setup
 - [ ] **Add basic component tests**
@@ -60,7 +60,7 @@ npm install --save-dev @testing-library/react @testing-library/jest-dom vitest j
 - [ ] **Fix npm cache setup**
 - [ ] Add cache setup for security-scan job:
 
-```
+
 ```yaml
 - name: Set up Node.js
   uses: actions/setup-node@v4
@@ -71,7 +71,7 @@ npm install --save-dev @testing-library/react @testing-library/jest-dom vitest j
       backend/package-lock.json
       frontend/package-lock.json
 ```
-```
+
 
 ---
 
@@ -82,7 +82,7 @@ npm install --save-dev @testing-library/react @testing-library/jest-dom vitest j
 - [ ] **Update vite.config.js**
 - [ ] Add server configuration:
 
-```
+
 ```javascript
 export default defineConfig({
   plugins: [react()],
@@ -101,7 +101,7 @@ export default defineConfig({
   }
 })
 ```
-```
+
 
 ### 2.2 React 19 Compatibility
 
@@ -111,11 +111,11 @@ export default defineConfig({
 - [ ] Check `react-grid-layout` compatibility with React 19
 - [ ] Consider downgrading to React 18 if issues persist:
 
-```
+
 ```bash
 npm install react@^18.3.1 react-dom@^18.3.1
 ```
-```
+
 
 ### 2.3 ESLint Configuration
 
@@ -149,7 +149,6 @@ npm install react@^18.3.1 react-dom@^18.3.1
 - [ ] **Create API key configuration system**
 - [ ] Create `backend/config/apiKeys.js`:
 
-```
 ```javascript
 const API_PROVIDERS = {
   VENICE: 'venice',
@@ -165,12 +164,11 @@ const API_ENDPOINTS = {
   anthropic: 'https://api.anthropic.com/v1'
 };
 ```
-```
+
 
 - [ ] **Update environment variables**
 - [ ] Add to `.env.example`:
 
-```
 ```
 # API Provider (venice, openai, gemini, anthropic)
 API_PROVIDER=venice
@@ -181,12 +179,10 @@ OPENAI_API_KEY=your_openai_key_here
 GEMINI_API_KEY=your_gemini_key_here
 ANTHROPIC_API_KEY=your_anthropic_key_here
 ```
-```
 
 - [ ] **Create API client abstraction**
 - [ ] Create `backend/services/apiClient.js`:
 
-```
 ```javascript
 class APIClient {
   constructor(provider, apiKey) {
@@ -199,7 +195,6 @@ class APIClient {
     // Unified interface for all providers
   }
 }
-```
 ```
 
 ### 3.2 Frontend API Key UI
@@ -484,6 +479,11 @@ act -j test-frontend
 ```
 
 ---
+
+Notes: for the complete venice AI docs and yaml, review the 
+Following Repo: [swagger info](https://github.com/Fayeblade1488/venice-API-reference)
+Offical website: [venice API Info](https://docs.venice.ai/api-reference/api-spec)
+Website: [venice.ai](https://venice.ai/home)
 
 **Last Updated:** 2025-10-04
 **Status:** 🔴 Needs Fixes
