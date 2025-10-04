@@ -1,61 +1,110 @@
 version: 2
+
+# Reusable bits
+x-common:
+  reviewers: &reviewers
+    - "Fayeblade1488"
+  assignees: &assignees
+    - "Fayeblade1488"
+  # Labels help routing/filters in your inbox and CI gates
+  labels: &labels
+    - "dependencies"
+  # Group rules to reduce PR spam
+  groups: &default_groups
+    minor-and-patch:
+      update-types: ["minor", "patch"]
+    dev-deps:
+      applies-to: version-updates
+      patterns:
+        - "@types/*"
+        - "eslint*"
+        - "prettier*"
+        - "vite*"
+        - "vitest*"
+        - "jest*"
+
 updates:
-  # Backend dependency updates
+  # ───────────────────────────── Backend (npm) ─────────────────────────────
   - package-ecosystem: "npm"
     directory: "/backend"
     schedule:
       interval: "weekly"
       day: "monday"
       time: "09:00"
+      timezone: "America/Los_Angeles"
     open-pull-requests-limit: 5
-    reviewers:
-      - "Fayeblade1488"
-    assignees:
-      - "Fayeblade1488"
+    reviewers: *reviewers
+    assignees: *assignees
+    labels:
+      - *labels
+      - "scope:backend"
     commit-message:
       prefix: "deps(backend)"
       include: "scope"
+    # Cohere related changes to fewer PRs
+    groups: *default_groups
     ignore:
-      # Ignore major version updates for these packages
+      # Keep majors manual for stability-critical libs
       - dependency-name: "express"
         update-types: ["version-update:semver-major"]
       - dependency-name: "jest"
         update-types: ["version-update:semver-major"]
 
-  # Frontend dependency updates
+  # ───────────────────────────── Frontend (npm) ────────────────────────────
   - package-ecosystem: "npm"
     directory: "/frontend"
     schedule:
       interval: "weekly"
       day: "monday"
       time: "09:00"
+      timezone: "America/Los_Angeles"
     open-pull-requests-limit: 5
-    reviewers:
-      - "Fayeblade1488"
-    assignees:
-      - "Fayeblade1488"
+    reviewers: *reviewers
+    assignees: *assignees
+    labels:
+      - *labels
+      - "scope:frontend"
     commit-message:
       prefix: "deps(frontend)"
       include: "scope"
+    groups:
+      <<: *default_groups
+      react-runtime:
+        applies-to: version-updates
+        patterns:
+          - "react"
+          - "react-dom"
+          - "react-router*"
+      build-tooling:
+        applies-to: version-updates
+        patterns:
+          - "vite"
+          - "rollup*"
+          - "esbuild*"
     ignore:
-      # Ignore major version updates for these packages
       - dependency-name: "react"
         update-types: ["version-update:semver-major"]
       - dependency-name: "vite"
         update-types: ["version-update:semver-major"]
 
-  # GitHub Actions updates
+  # ───────────────────────────── GitHub Actions ────────────────────────────
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "monthly"
       day: "monday"
       time: "09:00"
+      timezone: "America/Los_Angeles"
     open-pull-requests-limit: 3
-    reviewers:
-      - "Fayeblade1488"
-    assignees:
-      - "Fayeblade1488"
+    reviewers: *reviewers
+    assignees: *assignees
+    labels:
+      - *labels
+      - "scope:ci"
     commit-message:
       prefix: "ci"
       include: "scope"
+    # Group minor/patch bump PRs for actions to keep noise low
+    groups:
+      actions-minor-and-patch:
+        update-types: ["minor", "patch"]
