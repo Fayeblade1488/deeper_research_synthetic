@@ -1,12 +1,12 @@
 /**
- * THE FORGE - Backend Server for Initiative: IRONCLAD
- * 
- * This is the main Express.js server that provides API endpoints for
- * the Deeper Research Synthetic project. It handles project management,
- * content generation, and serves as the backend for "THE LENS" frontend.
- * 
+ * @file This file is the main entry point for the backend server of the Deeper Research Synthetic project, also known as "THE FORGE".
  * @author Paradroid AI
  * @version 1.0.0
+ * 
+ * @description This Express.js server provides a RESTful API for managing projects, generating content, and monitoring server performance.
+ * It serves as the backend for "THE LENS" frontend application.
+ * The server maintains an in-memory database for projects and uses a locking mechanism to handle concurrent updates.
+ * It also integrates with a performance monitoring service to track server health and resource usage.
  */
 
 const express = require('express');
@@ -29,10 +29,12 @@ let projects = [];
 const projectUpdateLocks = new Map();
 
 /**
- * Acquire a lock for project updates to prevent race conditions
- * 
- * @param {string} projectId - The project ID to lock
- * @returns {Promise<Function>} Promise resolving to unlock function
+ * Acquires a lock for a specific project to prevent race conditions during updates.
+ * This function ensures that only one update operation can be performed on a project at a time.
+ * If a lock is already held for the requested project, the function will wait until the lock is released before acquiring a new one.
+ *
+ * @param {string} projectId - The unique identifier of the project to lock.
+ * @returns {Promise<Function>} A Promise that resolves to a `releaseLock` function. This function must be called to release the lock once the update operation is complete.
  */
 function acquireProjectLock(projectId) {
     // If there's already a lock, wait for it
@@ -62,30 +64,42 @@ const { performanceMonitor } = require('./services/performanceService');
 // --- API Routes for Projects ---
 
 /**
- * GET /api/projects - Retrieve all projects
- * 
- * Returns a JSON array of all projects currently stored in memory.
- * Each project contains id, name, framework, sourceContext, generatedContent,
- * metadata, timestamps, and status.
- * 
  * @route GET /api/projects
- * @returns {Array<Object>} Array of project objects
+ * @description Retrieves a list of all projects currently stored in the in-memory database.
+ * Each project object in the returned array contains detailed information about the project.
+ * 
+ * @returns {void}
+ * 
+ * @response {200} {Array<Object>} An array of project objects. Each object includes:
+ * - {string} id - The unique identifier for the project.
+ * - {string} name - The name of the project.
+ * - {string} framework - The framework type of the project (e.g., PROJECT_DEEPDIVE).
+ * - {string} sourceContext - The source context or input for the project.
+ * - {string} generatedContent - The content generated for the project.
+ * - {Object} generationMetadata - Metadata related to the content generation process.
+ * - {string} createdAt - The ISO 8601 timestamp of when the project was created.
+ * - {string} updatedAt - The ISO 8601 timestamp of when the project was last updated.
+ * - {string} status - The current status of the project (e.g., 'New', 'In Progress', 'Completed').
  */
 app.get('/api/projects', (req, res) => {
     res.json(projects);
 });
 
 /**
- * POST /api/projects - Create a new project
- * 
- * Creates a new project with the specified name and framework type.
- * Generates a unique UUID for the project and initializes default values.
- * 
  * @route POST /api/projects
- * @param {string} req.body.name - The project name
- * @param {string} req.body.framework - Framework type (PROJECT_DEEPDIVE, PROJECT_SYNTHETIC, PROJECT_BENCHMARK)
- * @returns {Object} The created project object
- * @throws {400} When name or framework is missing
+ * @description Creates a new project with a specified name and framework type.
+ * A unique UUID is generated for the project, and default values are initialized for its properties.
+ * 
+ * @param {Object} req - The Express request object.
+ * @param {Object} req.body - The request body containing the project details.
+ * @param {string} req.body.name - The name of the project. This is a required field.
+ * @param {string} req.body.framework - The framework type for the project (e.g., PROJECT_DEEPDIVE, PROJECT_SYNTHETIC, PROJECT_BENCHMARK). This is a required field.
+ * @param {Object} res - The Express response object.
+ * 
+ * @returns {void}
+ * 
+ * @response {201} {Object} The newly created project object.
+ * @response {400} {Object} An error object indicating that the project name or framework is missing.
  */
 app.post('/api/projects', (req, res) => {
     const { name, framework } = req.body;
@@ -109,14 +123,18 @@ app.post('/api/projects', (req, res) => {
 });
 
 /**
- * GET /api/projects/:id - Retrieve a single project
- * 
- * Retrieves a specific project by its unique identifier.
- * 
  * @route GET /api/projects/:id
- * @param {string} req.params.id - The unique project ID
- * @returns {Object} The project object if found
- * @throws {404} When project with specified ID is not found
+ * @description Retrieves a single project by its unique identifier.
+ * 
+ * @param {Object} req - The Express request object.
+ * @param {Object} req.params - The URL parameters.
+ * @param {string} req.params.id - The unique identifier of the project to retrieve.
+ * @param {Object} res - The Express response object.
+ * 
+ * @returns {void}
+ * 
+ * @response {200} {Object} The project object with the specified ID.
+ * @response {404} {Object} An error object indicating that the project was not found.
  */
 app.get('/api/projects/:id', (req, res) => {
     const project = projects.find(p => p.id === req.params.id);
@@ -127,16 +145,23 @@ app.get('/api/projects/:id', (req, res) => {
 });
 
 /**
- * PUT /api/projects/:id - Update a project
- * 
- * Updates an existing project with new data using atomic operations to prevent race conditions.
- * The project ID cannot be changed. Updates the updatedAt timestamp automatically.
- * 
  * @route PUT /api/projects/:id
- * @param {string} req.params.id - The unique project ID
- * @param {Object} req.body - Project update data (sourceContext, generatedContent, etc.)
- * @returns {Object} The updated project object
- * @throws {404} When project with specified ID is not found
+ * @description Updates an existing project with new data.
+ * This endpoint uses a locking mechanism to ensure atomic updates and prevent race conditions.
+ * The project's `updatedAt` timestamp is automatically updated, and a version number is incremented for optimistic locking.
+ * The project ID cannot be changed.
+ * 
+ * @param {Object} req - The Express request object.
+ * @param {Object} req.params - The URL parameters.
+ * @param {string} req.params.id - The unique identifier of the project to update.
+ * @param {Object} req.body - The request body containing the new data for the project.
+ * @param {Object} res - The Express response object.
+ * 
+ * @returns {void}
+ * 
+ * @response {200} {Object} The updated project object.
+ * @response {404} {Object} An error object indicating that the project was not found.
+ * @response {500} {Object} An error object indicating an internal server error occurred during the update process.
  */
 app.put('/api/projects/:id', async (req, res) => {
     const projectId = req.params.id;
@@ -181,14 +206,19 @@ app.put('/api/projects/:id', async (req, res) => {
 });
 
 /**
- * DELETE /api/projects/:id - Delete a project
- * 
- * Permanently removes a project from memory. This action cannot be undone.
- * 
  * @route DELETE /api/projects/:id
- * @param {string} req.params.id - The unique project ID to delete
- * @returns {void} Empty response with 204 status code
- * @throws {404} When project with specified ID is not found
+ * @description Permanently deletes a project from the in-memory database.
+ * This action is irreversible.
+ * 
+ * @param {Object} req - The Express request object.
+ * @param {Object} req.params - The URL parameters.
+ * @param {string} req.params.id - The unique identifier of the project to delete.
+ * @param {Object} res - The Express response object.
+ * 
+ * @returns {void}
+ * 
+ * @response {204} - An empty response indicating that the project was successfully deleted.
+ * @response {404} {Object} An error object indicating that the project was not found.
  */
 app.delete('/api/projects/:id', (req, res) => {
     const projectIndex = projects.findIndex(p => p.id === req.params.id);
@@ -206,18 +236,22 @@ app.use('/api/generate', generationRoutes);
 // --- Server Status and Startup ---
 
 /**
- * GET /api/status - Server health check and status
- * 
- * Provides information about the server's operational status,
- * current project count, and Gemini API configuration status.
- * Used by the frontend and monitoring tools to verify server health.
- * 
  * @route GET /api/status
- * @returns {Object} Server status object containing:
- *   - status: Operational status message
- *   - phase: Current operational phase
- *   - projectCount: Number of projects currently in memory
- *   - geminiConfigured: Boolean indicating if Gemini API key is configured
+ * @description Provides a health check and status report for the server.
+ * This endpoint is used by the frontend and monitoring tools to verify that the server is operational.
+ * It returns information about the server's status, the number of projects, and the status of the Gemini API configuration.
+ * 
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * 
+ * @returns {void}
+ * 
+ * @response {200} {Object} A server status object with the following properties:
+ * - {string} status - An operational status message (e.g., 'THE FORGE is operational').
+ * - {string} phase - The current operational phase of the server (e.g., 'Operation COGNITION').
+ * - {number} projectCount - The number of projects currently stored in memory.
+ * - {boolean} geminiConfigured - A boolean indicating whether the Gemini API key is configured.
+ * - {Object} performance - An object containing performance metrics from the `performanceMonitor` service.
  */
 app.get('/api/status', (req, res) => {
     const perfMetrics = performanceMonitor.getMetrics();
@@ -239,16 +273,16 @@ app.get('/api/status', (req, res) => {
 });
 
 /**
- * GET /api/performance - Detailed performance metrics
- * 
- * Provides comprehensive performance monitoring data including:
- * - Memory usage trends and leak detection
- * - Request/response statistics
- * - Active generation tracking
- * - System health indicators
- * 
  * @route GET /api/performance
- * @returns {Object} Detailed performance metrics and system health data
+ * @description Retrieves detailed performance metrics from the `performanceMonitor` service.
+ * This endpoint provides a comprehensive overview of the server's performance, including memory usage, request statistics, and system health.
+ * 
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * 
+ * @returns {void}
+ * 
+ * @response {200} {Object} An object containing detailed performance metrics.
  */
 app.get('/api/performance', (req, res) => {
     const metrics = performanceMonitor.getMetrics();
@@ -256,13 +290,16 @@ app.get('/api/performance', (req, res) => {
 });
 
 /**
- * POST /api/performance/report - Generate performance report
- * 
- * Triggers immediate generation of a comprehensive performance report.
- * Useful for debugging and monitoring system health.
- * 
  * @route POST /api/performance/report
- * @returns {Object} Complete performance report with analysis
+ * @description Triggers the immediate generation of a comprehensive performance report.
+ * This is useful for debugging and on-demand monitoring of the system's health.
+ * 
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * 
+ * @returns {void}
+ * 
+ * @response {200} {Object} A complete performance report with analysis.
  */
 app.post('/api/performance/report', (req, res) => {
     const report = performanceMonitor.generatePerformanceReport();
@@ -270,14 +307,17 @@ app.post('/api/performance/report', (req, res) => {
 });
 
 /**
- * PUT /api/performance/thresholds - Update performance thresholds
- * 
- * Allows dynamic adjustment of performance monitoring thresholds.
- * Useful for tuning alerts and monitoring sensitivity.
- * 
  * @route PUT /api/performance/thresholds
- * @param {Object} req.body - New threshold values
- * @returns {Object} Updated threshold configuration
+ * @description Allows for the dynamic adjustment of performance monitoring thresholds.
+ * This is useful for tuning alerts and monitoring sensitivity based on the server's workload.
+ * 
+ * @param {Object} req - The Express request object.
+ * @param {Object} req.body - The request body containing the new threshold values.
+ * @param {Object} res - The Express response object.
+ * 
+ * @returns {void}
+ * 
+ * @response {200} {Object} An object containing a confirmation message and the updated threshold configuration.
  */
 app.put('/api/performance/thresholds', (req, res) => {
     performanceMonitor.updateThresholds(req.body);
@@ -288,10 +328,11 @@ app.put('/api/performance/thresholds', (req, res) => {
 });
 
 /**
- * Start the Express server
+ * Starts the Express server and listens for incoming connections on the specified port.
+ * It logs a startup message to the console with information about the server's status and configuration.
  * 
- * Initializes the server on the specified port and displays startup information.
- * Includes system status, configuration details, and operational readiness indicators.
+ * @param {number} PORT - The port number on which the server will listen.
+ * @param {Function} callback - A callback function that is executed once the server has successfully started.
  */
 app.listen(PORT, () => {
     console.log(`\n==============================================`);

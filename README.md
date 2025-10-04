@@ -115,6 +115,15 @@ deeper-research-synthetic/
 └── WARP.md                        # WARP.dev guidance
 ```
 
+## 👥 Code Ownership
+
+This project follows the standard GitHub CODEOWNERS pattern for managing code ownership and review requirements. Key maintainers include:
+
+- **Primary Maintainer**: Fayeblade1488 (current project owner)
+- **Original Author**: Paradroid AI (original creator and source repository owner: para-droid-ai)
+
+See the [CODEOWNERS](./CODEOWNERS) file for specific path-based ownership assignments.
+
 ## ⚡ Quick Start
 
 ### Prerequisites

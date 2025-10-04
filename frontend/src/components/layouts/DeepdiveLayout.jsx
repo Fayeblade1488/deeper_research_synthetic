@@ -1,3 +1,12 @@
+/**
+ * @file This file contains the `DeepdiveLayout` component, which defines the user interface for the PROJECT_DEEPDIVE framework.
+ * @author Paradroid AI
+ * @version 1.0.0
+ * 
+ * @description This component arranges the `SourcePanel`, `DraftPanel`, and `GenerationControlPanel` in a responsive grid layout.
+ * It manages the state of the generated content and the generation process for the Deepdive framework.
+ */
+
 import React, { useState } from 'react';
 import RGL, { WidthProvider } from 'react-grid-layout';
 import SourcePanel from '../panels/SourcePanel';
@@ -6,10 +15,28 @@ import GenerationControlPanel from '../GenerationControlPanel';
 
 const ReactGridLayout = WidthProvider(RGL);
 
-const DeepdiveLayout = ({ project, onUpdateGeneratedContent }) => {
+/**
+ * The layout component for the PROJECT_DEEPDIVE framework.
+ * This component uses `react-grid-layout` to create a draggable and resizable grid of panels.
+ * The layout consists of a `SourcePanel` for the input, a `DraftPanel` for the output, and a `GenerationControlPanel` to control the generation process.
+ *
+ * @param {object} props - The props for the component.
+ * @param {object} props.project - The currently selected project object.
+ * @param {function} props.onUpdateGeneratedContent - A callback function to save the generated content and metadata.
+ * @returns {JSX.Element} The rendered Deepdive layout.
+ */
+function DeepdiveLayout({ project, onUpdateGeneratedContent }) {
     const [generatedContent, setGeneratedContent] = useState(project.generatedContent || '');
     const [isGenerating, setIsGenerating] = useState(false);
 
+    /**
+     * Handles the completion of the content generation process.
+     * It updates the component's state with the newly generated content and sets the `isGenerating` flag to false.
+     * It also calls the `onUpdateGeneratedContent` callback to save the content and metadata to the project.
+     *
+     * @param {string} content - The generated content.
+     * @param {object} metadata - The metadata associated with the generation process.
+     */
     const handleGenerationComplete = async (content, metadata) => {
         setGeneratedContent(content);
         setIsGenerating(false);
@@ -20,10 +47,18 @@ const DeepdiveLayout = ({ project, onUpdateGeneratedContent }) => {
         }
     };
 
+    /**
+     * Handles the start of the content generation process.
+     * It sets the `isGenerating` flag to true.
+     */
     const handleGenerationStart = () => {
         setIsGenerating(true);
     };
 
+    /**
+     * Handles the stopping of the content generation process.
+     * It sets the `isGenerating` flag to false.
+     */
     const handleGenerationStop = () => {
         setIsGenerating(false);
     };

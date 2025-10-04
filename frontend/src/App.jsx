@@ -1,13 +1,10 @@
 /**
- * THE LENS - Main Application Component
- * 
- * Root React component for the Deeper Research Synthetic frontend.
- * Manages project state, sidebar navigation, and modal dialogs for project creation.
- * Serves as the primary interface to THE FORGE backend system.
- * 
- * @component
+ * @file This file contains the main application component for "THE LENS", the frontend for the Deeper Research Synthetic project.
  * @author Paradroid AI
  * @version 1.0.0
+ * 
+ * @description This root React component manages the overall application state, including the list of projects, the currently selected project, and the user interface for creating new projects.
+ * It communicates with "THE FORGE" backend to fetch, create, update, and delete projects.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -20,12 +17,11 @@ import 'react-resizable/css/styles.css';
 const API_URL = 'http://localhost:3001/api';
 
 /**
- * Main Application Component
- * 
- * Manages the overall application state including projects list,
- * selected project, and project creation workflow.
- * 
- * @returns {JSX.Element} The complete application interface
+ * The main application component with modern UI design.
+ * This component manages the application's overall state, including the list of projects, the currently selected project, and the project creation workflow.
+ * It renders a modern, responsive interface with improved UX for project navigation and content generation.
+ *
+ * @returns {JSX.Element} The rendered application interface with enhanced UI.
  */
 function App() {
     /** @type {[Array<Object>, Function]} List of all projects */
@@ -49,10 +45,9 @@ function App() {
     }, []);
 
     /**
-     * Fetch all projects from THE FORGE backend
-     * 
-     * Retrieves the current list of projects and updates the component state.
-     * Handles errors gracefully by logging to console.
+     * Fetches the list of all projects from the backend API.
+     * The fetched projects are then used to update the component's state.
+     * Errors during the fetch operation are logged to the console.
      */
     const fetchProjects = async () => {
         try {
@@ -65,13 +60,11 @@ function App() {
     };
 
     /**
-     * Handle project creation form submission
-     * 
-     * Creates a new project with the specified name and framework,
-     * updates the projects list, resets the form, closes the modal,
-     * and automatically selects the new project.
-     * 
-     * @param {Event} e - Form submission event
+     * Handles the submission of the new project form.
+     * It sends a POST request to the backend to create a new project with the specified name and framework.
+     * Upon successful creation, it updates the projects list, resets the form fields, closes the creation modal, and selects the newly created project.
+     *
+     * @param {React.FormEvent<HTMLFormElement>} e - The form submission event.
      */
     const handleCreateProject = async (e) => {
         e.preventDefault();
@@ -93,13 +86,12 @@ function App() {
     };
 
     /**
-     * Update a project's source context
-     * 
-     * Updates the source context for a specific project and refreshes
-     * both the projects list and selected project state.
-     * 
-     * @param {string} projectId - Unique identifier of the project
-     * @param {string} newContext - New source context content
+     * Updates the source context of a specific project.
+     * It sends a PUT request to the backend to update the project with the new context.
+     * Upon successful update, it refreshes both the projects list and the selected project in the component's state.
+     *
+     * @param {string} projectId - The unique identifier of the project to be updated.
+     * @param {string} newContext - The new source context to be saved.
      */
     const handleUpdateProjectContext = async (projectId, newContext) => {
         try {
@@ -118,14 +110,13 @@ function App() {
     };
 
     /**
-     * Update a project with generated content and metadata
-     * 
-     * Saves generated content and associated metadata to a project,
-     * updating both the projects list and selected project state.
-     * 
-     * @param {string} projectId - Unique identifier of the project
-     * @param {string} content - Generated content text
-     * @param {Object} metadata - Generation metadata (timing, validation, etc.)
+     * Updates a project with newly generated content and its associated metadata.
+     * It sends a PUT request to the backend to save the generated content and metadata to the project.
+     * Upon successful update, it refreshes both the projects list and the selected project in the component's state.
+     *
+     * @param {string} projectId - The unique identifier of the project to be updated.
+     * @param {string} content - The generated content to be saved.
+     * @param {Object} metadata - The metadata associated with the generation process (e.g., timing, validation results).
      */
     const handleUpdateGeneratedContent = async (projectId, content, metadata) => {
         try {
@@ -147,15 +138,14 @@ function App() {
     };
 
     /**
-     * Delete a project after user confirmation
-     * 
-     * Prompts the user for confirmation before permanently deleting a project.
-     * Removes the project from the list and clears selection if it was selected.
-     * 
-     * @param {string} projectId - Unique identifier of the project to delete
+     * Deletes a project after receiving user confirmation.
+     * It sends a DELETE request to the backend to remove the project.
+     * Upon successful deletion, it removes the project from the projects list and clears the selection if the deleted project was the currently selected one.
+     *
+     * @param {string} projectId - The unique identifier of the project to be deleted.
      */
     const handleDeleteProject = async (projectId) => {
-        if (window.confirm('Are you sure you want to delete this project?')) {
+        if (window.confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
             try {
                 await fetch(`${API_URL}/projects/${projectId}`, { method: 'DELETE' });
                 setProjects(projects.filter(p => p.id !== projectId));
@@ -172,22 +162,76 @@ function App() {
         <div className="app-container">
             <aside className="sidebar">
                 <div className="sidebar-header">
-                    <h1>Initiative: IRONCLAD</h1>
-                    <p>Creation Interface</p>
-                </div>
-                <div className="project-list">
-                    {projects.map(p => (
-                        <div 
-                            key={p.id} 
-                            className={`project-item ${selectedProject?.id === p.id ? 'selected' : ''}`}
-                            onClick={() => setSelectedProject(p)}
-                        >
-                            <h3>{p.name}</h3>
-                            <p>{p.framework}</p>
+                    <div className="logo-container">
+                        <div className="logo-icon">🔬</div>
+                        <div>
+                            <h1>Deeper Research</h1>
+                            <div className="app-subtitle">AI-Powered Content Generation</div>
                         </div>
-                    ))}
+                    </div>
                 </div>
-                <button className="new-project-btn" onClick={() => setIsCreating(true)}>+ New Project</button>
+                
+                <div className="controls-section">
+                    <div className="section-header">
+                        <h3>Projects</h3>
+                        <span className="project-count">{projects.length}</span>
+                    </div>
+                    <button 
+                        className="new-project-btn" 
+                        onClick={() => setIsCreating(true)}
+                        title="Create new project"
+                    >
+                        <span role="img" aria-label="add">➕</span> New Project
+                    </button>
+                </div>
+
+                <div className="project-list">
+                    {projects.length === 0 ? (
+                        <div className="empty-state">
+                            <div role="img" aria-label="empty" className="empty-icon">📚</div>
+                            <p>No projects yet</p>
+                            <p className="subtext">Create your first project to get started</p>
+                        </div>
+                    ) : (
+                        projects.map(p => (
+                            <div 
+                                key={p.id} 
+                                className={`project-item ${selectedProject?.id === p.id ? 'selected' : ''}`}
+                                onClick={() => setSelectedProject(p)}
+                                title={p.name}
+                            >
+                                <div className="project-info">
+                                    <h3 className="project-name">{p.name}</h3>
+                                    <div className="project-meta">
+                                        <span className={`framework-tag ${p.framework.toLowerCase().replace('project_', '')}`}>
+                                            {p.framework.replace('PROJECT_', '')}
+                                        </span>
+                                        <span className="project-status">
+                                            {p.status || 'New'}
+                                        </span>
+                                    </div>
+                                    {p.updatedAt && (
+                                        <div className="project-updated">
+                                            Updated: {new Date(p.updatedAt).toLocaleDateString()}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="project-actions">
+                                    <button 
+                                        className="delete-btn" 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDeleteProject(p.id);
+                                        }}
+                                        title="Delete project"
+                                    >
+                                        🗑️
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
             </aside>
 
             <main className="main-content">
@@ -200,35 +244,94 @@ function App() {
             </main>
 
             {isCreating && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <h2>Create New Project</h2>
-                        <form onSubmit={handleCreateProject}>
-                            <label>Project Name</label>
-                            <input 
-                                type="text"
-                                value={newProjectName}
-                                onChange={(e) => setNewProjectName(e.target.value)}
-                                placeholder="e.g., Analysis of Q2 Economic Trends"
-                                required
-                            />
-                            <label>Select Framework</label>
-                            <select 
-                                value={newProjectFramework}
-                                onChange={(e) => setNewProjectFramework(e.target.value)}
+                <div className="modal-overlay" onClick={() => setIsCreating(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>Create New Project</h2>
+                            <button 
+                                className="modal-close" 
+                                onClick={() => setIsCreating(false)}
+                                title="Close"
                             >
-                                <option value="PROJECT_DEEPDIVE">PROJECT DEEPDIVE (TOME)</option>
-                                <option value="PROJECT_SYNTHETIC">PROJECT SYNTHETIC (TRANSMISSION)</option>
-                                <option value="PROJECT_BENCHMARK">PROJECT BENCHMARK (SNAPSHOT)</option>
-                            </select>
+                                ✕
+                            </button>
+                        </div>
+                        <form onSubmit={handleCreateProject}>
+                            <div className="form-group">
+                                <label htmlFor="projectName">Project Name</label>
+                                <input 
+                                    id="projectName"
+                                    type="text"
+                                    value={newProjectName}
+                                    onChange={(e) => setNewProjectName(e.target.value)}
+                                    placeholder="Enter project name..."
+                                    required
+                                    autoFocus
+                                />
+                            </div>
+                            
+                            <div className="form-group">
+                                <label htmlFor="frameworkSelect">Framework Type</label>
+                                <select 
+                                    id="frameworkSelect"
+                                    value={newProjectFramework}
+                                    onChange={(e) => setNewProjectFramework(e.target.value)}
+                                >
+                                    <option value="PROJECT_DEEPDIVE"> PROJECT DEEPDIVE (Academic Paper)</option>
+                                    <option value="PROJECT_SYNTHETIC"> PROJECT SYNTHETIC (Podcast Script)</option>
+                                    <option value="PROJECT_BENCHMARK"> PROJECT BENCHMARK (Risk Assessment)</option>
+                                </select>
+                            </div>
+                            
+                            <div className="form-info">
+                                <div className="framework-info">
+                                    <div className="info-item deepdive">
+                                        <strong>PROJECT DEEPDIVE:</strong> Academic-style research papers with citations, minimum 10,000 words, 5+ sections
+                                    </div>
+                                    <div className="info-item synthetic">
+                                        <strong>PROJECT SYNTHETIC:</strong> Narrative podcast episodes with storytelling, minimum 15,000 words, "Good morning" opener
+                                    </div>
+                                    <div className="info-item benchmark">
+                                        <strong>PROJECT BENCHMARK:</strong> Data-driven risk assessments with DEFCON ratings, minimum 5,000 words, 10+ data tables
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div className="modal-actions">
-                                <button type="button" onClick={() => setIsCreating(false)}>Cancel</button>
-                                <button type="submit">Create</button>
+                                <button 
+                                    type="button" 
+                                    className="btn-secondary" 
+                                    onClick={() => setIsCreating(false)}
+                                >
+                                    Cancel
+                                </button>
+                                <button type="submit" className="btn-primary">
+                                    Create Project
+                                </button>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
+            
+            <div className="status-bar">
+                <div className="status-item connected">
+                    <span role="img" aria-label="connection">📡</span>
+                    <span>Backend Connected</span>
+                </div>
+                <div className="status-item">
+                    <span role="img" aria-label="projects">📚</span>
+                    <span>{projects.length} Projects</span>
+                </div>
+                <div className="status-item">
+                    <span role="img" aria-label="ai">🤖</span>
+                    <span>AI Ready</span>
+                </div>
+                <div className="status-item">
+                    <span role="img" aria-label="user">👤</span>
+                    <span>User: Researcher</span>
+                </div>
+            </div>
         </div>
     );
 }

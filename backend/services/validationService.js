@@ -1,11 +1,15 @@
 const { getFrameworkMetadata } = require('./frameworkService');
 
 /**
- * Safe regex matching with timeout protection against ReDoS attacks
- * @param {string} text - Text to match against
- * @param {RegExp} pattern - Regex pattern to use
- * @param {number} timeoutMs - Timeout in milliseconds
- * @returns {Promise<RegExpMatchArray|null>} Match result or null
+ * Safely executes a regular expression match with a timeout to prevent Regular Expression Denial of Service (ReDoS) attacks.
+ * If the regex execution exceeds the specified timeout, it rejects the Promise with a timeout error.
+ *
+ * @param {string} text - The text to match the regular expression against.
+ * @param {RegExp} pattern - The regular expression pattern to use for matching.
+ * @param {number} [timeoutMs=1000] - The maximum time in milliseconds to allow for the regex execution.
+ *
+ * @returns {Promise<RegExpMatchArray|null>} A Promise that resolves to the result of the match, or `null` if no match is found.
+ * Rejects the Promise if the regex times out or if an error occurs during execution.
  */
 function safeMatch(text, pattern, timeoutMs = 1000) {
     return new Promise((resolve, reject) => {
@@ -25,10 +29,14 @@ function safeMatch(text, pattern, timeoutMs = 1000) {
 }
 
 /**
- * Validate generated output against framework requirements
- * @param {string} content - Generated content
- * @param {string} frameworkType - Framework type
- * @returns {Promise<Object>} Validation result
+ * Validates the generated content against the requirements of the specified framework.
+ * This function checks for word count, and then delegates to framework-specific validation functions.
+ *
+ * @param {string} content - The generated content to be validated.
+ * @param {string} frameworkType - The type of the framework to validate against.
+ *
+ * @returns {Promise<Object>} A Promise that resolves to a validation result object.
+ * The object contains a `valid` boolean, and arrays of `errors` and `warnings`.
  */
 async function validateOutput(content, frameworkType) {
     const framework = getFrameworkMetadata(frameworkType);
@@ -78,7 +86,14 @@ async function validateOutput(content, frameworkType) {
 }
 
 /**
- * Validate DEEPDIVE (TOME) output with ReDoS protection
+ * Validates the content of a PROJECT_DEEPDIVE (TOME) output.
+ * This function checks for the presence of a title, main sections, subsections, and citations.
+ * It uses the `safeMatch` function to prevent ReDoS attacks on the regex patterns.
+ *
+ * @param {string} content - The generated content to validate.
+ * @param {Array<string>} errors - An array to which any validation errors will be added.
+ * @param {Array<string>} warnings - An array to which any validation warnings will be added.
+ * @returns {Promise<void>} A Promise that resolves when the validation is complete.
  */
 async function validateDeepdive(content, errors, warnings) {
     try {
@@ -124,7 +139,12 @@ async function validateDeepdive(content, errors, warnings) {
 }
 
 /**
- * Validate SYNTHETIC (TRANSMISSION) output
+ * Validates the content of a PROJECT_SYNTHETIC (TRANSMISSION) output.
+ * This function checks for the presence of standard openers, closers, and "Key Implication" sections.
+ *
+ * @param {string} content - The generated content to validate.
+ * @param {Array<string>} errors - An array to which any validation errors will be added.
+ * @param {Array<string>} warnings - An array to which any validation warnings will be added.
  */
 function validateSynthetic(content, errors, warnings) {
     // Check for opener
@@ -145,7 +165,12 @@ function validateSynthetic(content, errors, warnings) {
 }
 
 /**
- * Validate BENCHMARK (SNAPSHOT) output
+ * Validates the content of a PROJECT_BENCHMARK (SNAPSHOT) output.
+ * This function checks for the presence of a DEFCON assessment, data tables, score columns, and proper citations.
+ *
+ * @param {string} content - The generated content to validate.
+ * @param {Array<string>} errors - An array to which any validation errors will be added.
+ * @param {Array<string>} warnings - An array to which any validation warnings will be added.
  */
 function validateBenchmark(content, errors, warnings) {
     // Check for DEFCON assessment
@@ -172,8 +197,11 @@ function validateBenchmark(content, errors, warnings) {
 }
 
 /**
- * Count actual content words in text, excluding markdown syntax and code
- * This prevents inflated word counts from passing validation incorrectly
+ * Counts the number of actual content words in a given text, excluding Markdown syntax, code blocks, and URLs.
+ * This function is designed to provide a more accurate word count for validation purposes, preventing inflated counts from Markdown formatting.
+ *
+ * @param {string} text - The text in which to count the words.
+ * @returns {number} The total number of content words in the text.
  */
 function countWords(text) {
     // Remove markdown code blocks

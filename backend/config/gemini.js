@@ -34,18 +34,24 @@ const modelConfig = {
 };
 
 /**
- * Get configured Gemini model instance
- * @returns {GenerativeModel} Configured Gemini model
+ * Returns a configured instance of the Google Generative AI model.
+ * The model is configured with the settings defined in the `modelConfig` object.
+ *
+ * @returns {GenerativeModel} A configured instance of the Gemini model.
  */
 function getModel() {
     return genAI.getGenerativeModel(modelConfig);
 }
 
 /**
- * Generate content with streaming support
- * @param {string} prompt - The full prompt including framework instructions
- * @param {Function} onChunk - Callback for each streamed chunk
- * @returns {Promise<string>} Complete generated text
+ * Generates content from the Gemini API with streaming support.
+ * This function is ideal for long-form content generation, as it allows for real-time progress updates.
+ *
+ * @param {string} prompt - The full prompt, including any framework instructions and source context.
+ * @param {Function} onChunk - A callback function that is invoked for each streamed chunk of text.
+ * The function is called with the chunk of text as its only argument.
+ *
+ * @returns {Promise<string>} A Promise that resolves to the complete generated text.
  */
 async function generateWithStreaming(prompt, onChunk) {
     const model = getModel();
@@ -66,9 +72,11 @@ async function generateWithStreaming(prompt, onChunk) {
 }
 
 /**
- * Generate content without streaming (for testing)
- * @param {string} prompt - The full prompt
- * @returns {Promise<string>} Generated text
+ * Generates content from the Gemini API without streaming.
+ * This function is suitable for shorter content generation tasks or for testing purposes.
+ *
+ * @param {string} prompt - The full prompt, including any framework instructions and source context.
+ * @returns {Promise<string>} A Promise that resolves to the complete generated text.
  */
 async function generateContent(prompt) {
     const model = getModel();

@@ -1,13 +1,20 @@
 /**
- * Performance Monitoring and Optimization Service
- * 
- * Provides tools for monitoring memory usage, detecting performance issues,
- * and implementing optimizations to prevent DoS and resource exhaustion.
+ * @class PerformanceMonitor
+ * @extends EventEmitter
+ * @description A service class for monitoring and optimizing the application's performance.
+ * It tracks various metrics such as memory usage, active generations, and error rates.
+ * The class emits events for performance warnings and alerts, and can generate detailed performance reports.
+ * This class is implemented as a singleton, with a single instance exported as `performanceMonitor`.
  */
 
 const EventEmitter = require('events');
 
 class PerformanceMonitor extends EventEmitter {
+    /**
+     * @constructor
+     * @description Initializes a new instance of the `PerformanceMonitor` class.
+     * It sets up the initial metrics, defines the performance thresholds, and starts the monitoring intervals.
+     */
     constructor() {
         super();
         this.metrics = {
@@ -32,7 +39,8 @@ class PerformanceMonitor extends EventEmitter {
     }
 
     /**
-     * Start performance monitoring with periodic checks
+     * Starts the performance monitoring intervals.
+     * This includes periodic checks for memory usage and the generation of hourly performance reports.
      */
     startMonitoring() {
         // Memory monitoring every 10 seconds
@@ -49,7 +57,8 @@ class PerformanceMonitor extends EventEmitter {
     }
 
     /**
-     * Stop all monitoring intervals
+     * Stops all active performance monitoring intervals.
+     * This is useful for graceful shutdowns or for testing purposes.
      */
     stopMonitoring() {
         this.intervals.forEach((interval) => {
@@ -60,7 +69,12 @@ class PerformanceMonitor extends EventEmitter {
     }
 
     /**
-     * Record a generation start
+     * Records the start of a new content generation process.
+     * It increments the active generation count and the total request count.
+     * If the number of active generations exceeds the defined threshold, it emits a 'warning' event.
+     *
+     * @param {string} projectId - The unique identifier of the project for which the generation is starting.
+     * @returns {Object} An object containing the project ID, the start time, and the memory usage at the start of the generation.
      */
     recordGenerationStart(projectId) {
         this.metrics.activeGenerations++;
@@ -83,7 +97,14 @@ class PerformanceMonitor extends EventEmitter {
     }
 
     /**
-     * Record a generation completion
+     * Records the completion of a content generation process.
+     * It decrements the active generation count, updates the average response time, and records any errors.
+     * If the generation time exceeds the defined threshold, it emits a 'warning' event.
+     *
+     * @param {string} projectId - The unique identifier of the project for which the generation is complete.
+     * @param {number} startTime - The timestamp of when the generation process started.
+     * @param {boolean} [success=true] - A boolean indicating whether the generation was successful.
+     * @returns {Object} An object containing the project ID, the duration of the generation, the success status, and the current number of active generations.
      */
     recordGenerationComplete(projectId, startTime, success = true) {
         this.metrics.activeGenerations = Math.max(0, this.metrics.activeGenerations - 1);
@@ -114,7 +135,12 @@ class PerformanceMonitor extends EventEmitter {
     }
 
     /**
-     * Record an error occurrence
+     * Records the occurrence of an error.
+     * It increments the error count and checks if the error rate has exceeded the defined threshold.
+     * If the error rate is too high, it emits an 'alert' event.
+     *
+     * @param {Error} error - The error object that was thrown.
+     * @param {Object} [context={}] - An optional object containing additional context about the error.
      */
     recordError(error, context = {}) {
         this.metrics.errors++;
@@ -134,7 +160,12 @@ class PerformanceMonitor extends EventEmitter {
     }
 
     /**
-     * Check current memory usage and emit warnings if necessary
+     * Checks the current memory usage of the application.
+     * It records the memory usage, updates the peak memory usage, and checks for threshold violations.
+     * If the memory usage is too high, it emits an 'alert' event.
+     * It also checks for potential memory leaks by analyzing the trend of recent memory usage.
+     *
+     * @returns {Object} An object containing the current memory usage in megabytes (rss, heapTotal, heapUsed, external).
      */
     checkMemoryUsage() {
         const usage = process.memoryUsage();
@@ -190,7 +221,15 @@ class PerformanceMonitor extends EventEmitter {
     }
 
     /**
-     * Calculate memory usage trend
+     * Calculates the trend of memory usage over a series of measurements.
+     * This function uses a simple linear regression to determine if the memory usage is increasing and at what rate.
+     *
+     * @param {Array<Object>} usageHistory - An array of memory usage measurements.
+     * Each object in the array should have an `rss` property representing the memory usage in megabytes.
+     * @returns {Object} An object containing the following properties:
+     * - {boolean} isIncreasing - Indicates whether the memory usage is trending upwards.
+     * - {number} growthRate - The rate of memory growth in megabytes per measurement.
+     * - {number} correlation - The correlation coefficient, which indicates the strength of the trend.
      */
     calculateMemoryTrend(usageHistory) {
         if (usageHistory.length < 2) {
@@ -216,7 +255,11 @@ class PerformanceMonitor extends EventEmitter {
     }
 
     /**
-     * Calculate correlation coefficient for trend strength
+     * Calculates the correlation coefficient for a series of memory usage measurements.
+     * This is used to determine the strength of the memory usage trend.
+     *
+     * @param {Array<Object>} usageHistory - An array of memory usage measurements.
+     * @returns {number} The correlation coefficient, a value between -1 and 1.
      */
     calculateCorrelation(usageHistory) {
         const n = usageHistory.length;
@@ -234,7 +277,10 @@ class PerformanceMonitor extends EventEmitter {
     }
 
     /**
-     * Update running average response time
+     * Updates the running average of the response time using an exponential moving average.
+     * This provides a smoothed average that gives more weight to recent measurements.
+     *
+     * @param {number} duration - The duration of the most recent response.
      */
     updateAverageResponseTime(duration) {
         const alpha = 0.1; // Exponential moving average factor
@@ -244,7 +290,11 @@ class PerformanceMonitor extends EventEmitter {
     }
 
     /**
-     * Generate comprehensive performance report
+     * Generates a comprehensive performance report.
+     * The report includes information about uptime, memory usage, request statistics, and the overall system status.
+     * It also emits a 'report' event with the generated report.
+     *
+     * @returns {Object} A performance report object.
      */
     generatePerformanceReport() {
         const uptime = Date.now() - this.metrics.startTime;
@@ -279,7 +329,9 @@ class PerformanceMonitor extends EventEmitter {
     }
 
     /**
-     * Calculate average memory growth rate
+     * Calculates the average memory growth rate based on recent memory usage measurements.
+     *
+     * @returns {number} The average memory growth rate in megabytes per measurement.
      */
     getAverageMemoryGrowth() {
         if (this.metrics.memoryUsage.length < 2) {
@@ -292,7 +344,10 @@ class PerformanceMonitor extends EventEmitter {
     }
 
     /**
-     * Determine overall system status
+     * Determines the overall system status based on the current performance metrics.
+     * The status can be 'healthy', 'warning', or 'critical'.
+     *
+     * @returns {string} The overall system status.
      */
     determineSystemStatus() {
         const currentMemory = Math.round(process.memoryUsage().rss / 1024 / 1024);
@@ -314,7 +369,9 @@ class PerformanceMonitor extends EventEmitter {
     }
 
     /**
-     * Get current performance metrics
+     * Returns the current performance metrics.
+     *
+     * @returns {Object} An object containing the current performance metrics.
      */
     getMetrics() {
         const currentMemory = process.memoryUsage();
@@ -332,7 +389,8 @@ class PerformanceMonitor extends EventEmitter {
     }
 
     /**
-     * Reset metrics (useful for testing)
+     * Resets all performance metrics to their initial values.
+     * This is primarily used for testing purposes.
      */
     resetMetrics() {
         this.metrics = {
@@ -347,7 +405,9 @@ class PerformanceMonitor extends EventEmitter {
     }
 
     /**
-     * Update performance thresholds
+     * Updates the performance monitoring thresholds with new values.
+     *
+     * @param {Object} newThresholds - An object containing the new threshold values to be applied.
      */
     updateThresholds(newThresholds) {
         this.thresholds = { ...this.thresholds, ...newThresholds };
