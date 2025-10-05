@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   workflow_dispatch:
 
 concurrency:
@@ -23,7 +23,7 @@ jobs:
       contents: read
       packages: read
       statuses: write
-      actions: write  # Added for artifact uploads
+      actions: write # Added for artifact uploads
     strategy:
       fail-fast: false
       matrix:
@@ -31,7 +31,7 @@ jobs:
     defaults:
       run:
         working-directory: backend
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -58,7 +58,7 @@ jobs:
 
       - name: Generate coverage report
         run: npm run test:coverage || true
-    
+
       - name: Upload backend coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
@@ -83,7 +83,7 @@ jobs:
       contents: read
       packages: read
       statuses: write
-      actions: write  # Added for artifact uploads
+      actions: write # Added for artifact uploads
     strategy:
       fail-fast: false
       matrix:
@@ -91,7 +91,7 @@ jobs:
     defaults:
       run:
         working-directory: frontend
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -140,30 +140,30 @@ jobs:
     permissions:
       contents: read
       security-events: write
-      actions: write  # Added for artifact uploads
-    
+      actions: write # Added for artifact uploads
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: "20.x"
           cache: npm
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.30.0
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: "trivy-results.sarif"
 
       - name: Run npm audit for backend
         working-directory: backend
@@ -176,7 +176,7 @@ jobs:
         run: |
           npm ci
           npm audit --audit-level=high || true
-          
+
       - name: Upload audit reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -194,12 +194,12 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    
+
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'javascript' ]
-    
+        language: ["javascript"]
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -210,7 +210,7 @@ jobs:
           languages: ${{ matrix.language }}
 
       - name: Autobuild
-        uses: github/codeql-action/build@v3
+        uses: github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -228,7 +228,7 @@ jobs:
     environment:
       name: staging
       url: https://staging.deeperresearch.dev
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -249,7 +249,7 @@ jobs:
     environment:
       name: production
       url: https://deeperresearch.dev
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
