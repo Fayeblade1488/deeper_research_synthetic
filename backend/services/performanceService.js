@@ -392,7 +392,7 @@ class PerformanceMonitor extends EventEmitter {
      * Resets all performance metrics to their initial values.
      * This is primarily used for testing purposes.
      */
-    resetMetrics() {
+    reset() {
         this.metrics = {
             memoryUsage: [],
             activeGenerations: 0,
