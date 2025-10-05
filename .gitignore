@@ -58,6 +58,7 @@ coverage/
 .classpath
 .settings/
 .vscode-test
+.DS_Store?
 
 # --- OS Files ---
 .DS_Store
