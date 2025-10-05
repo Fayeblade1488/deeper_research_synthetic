@@ -4,10 +4,10 @@
 
 **First Time Here?** Read these files in order:
 1. This file (overview and patterns)
-2. `.agent-logs/context.txt` (5-minute read: core project understanding)
-3. `.agent-logs/_Deeper Research Synthetic - Complete Fix Checklist.md` (comprehensive task list)
-4. `.agent-logs/2025-10-04_deeper_research_repo_analysis.md` (deep dive when needed)
-5. `.agent-logs/.warp/WARP.md` (all CLI commands)
+2. `./docs/context.txt` (5-minute read: core project understanding)
+3. `./docs/_Deeper Research Synthetic - Complete Fix Checklist.md` (comprehensive task list)
+4. `./docs/2025-10-04_deeper_research_repo_analysis.md` (deep dive when needed)
+5. `./docs/.warp/WARP.md` (all CLI commands)
 
 **Current Priority**: Fix CI/CD blockers first (see Bug Fix Priority Diagram below)
 
@@ -218,7 +218,7 @@ Using React 19.1.0 with Vite 7. If experiencing issues with third-party librarie
 ## Known Issues & Documented Bugs
 
 ### Active Bug Tracking
-See `.agent-logs/_Deeper Research Synthetic - Complete Fix Checklist.md` for comprehensive bug list documented during 2025-10-03 session:
+See `./docs/_Deeper Research Synthetic - Complete Fix Checklist.md` for comprehensive bug list documented during 2025-10-03 session:
 
 **Major Bugs (from 2025-10-03 analysis)**:
 1. **BUG-M1**: Memory leak in SSE stream management (`routes/generation.js:25-66`)
@@ -248,7 +248,7 @@ See `.agent-logs/_Deeper Research Synthetic - Complete Fix Checklist.md` for com
 4. Missing input sanitization (`server.js:27-31`)
 5. Inconsistent port configuration (`server.js:7,99`)
 
-**Testing Coverage**: Currently 0% across backend/frontend. See `.agent-logs/changes/2025-10-03-bug-analysis.md` for detailed analysis.
+**Testing Coverage**: Currently 0% across backend/frontend. See `./docs/changes/2025-10-03-bug-analysis.md` for detailed analysis.
 
 ### Bug Fix Priority Diagram
 
@@ -309,7 +309,7 @@ Legend:
 
 ### Bug Fix Pattern
 When fixing bugs, follow this workflow:
-1. Check if bug is documented in `.agent-logs/` or `docs/BUG_REPORT.md`
+1. Check if bug is documented in `./docs/` or `docs/BUG_REPORT.md`
 2. Add unit test reproducing the bug
 3. Implement fix with code comments referencing bug ID
 4. Update documentation with fix details
@@ -318,7 +318,7 @@ When fixing bugs, follow this workflow:
 **Example Fix Implementation**:
 ```javascript
 // BUG-M1 FIX: Add SSE connection cleanup to prevent memory leaks
-// See: .agent-logs/changes/2025-10-03-bug-analysis.md
+// See: ./docs/changes/2025-10-03-bug-analysis.md
 router.post('/:projectId', async (req, res) => {
   // ... existing code ...
 
@@ -363,7 +363,7 @@ class APIClient {
 - OpenAI-compatible API (drop-in replacement)
 - No data retention for training
 - Transparent logging policies
-- See `.agent-logs/` for Venice.ai documentation references
+- See `./docs/` for Venice.ai documentation references
 
 ### Venice.ai API Specification
 
@@ -472,14 +472,14 @@ data: [DONE]
 - `docs/TESTING_GUIDE.md`: Test patterns and coverage requirements
 
 **Agent Logs & Context**:
-- `.agent-logs/2025-10-04_deeper_research_repo_analysis.md`: Complete repository analysis (719 lines)
-- `.agent-logs/_Deeper Research Synthetic - Complete Fix Checklist.md`: Bug inventory and fix plan (8 sections)
-- `.agent-logs/Completed Tasks.md`: Task tracking and phase progress
-- `.agent-logs/context.txt`: Session context and preferences
-- `.agent-logs/changes/2025-10-03-bug-analysis.md`: Detailed bug report with fix strategies
-- `.agent-logs/daily/chat_summary_2025-10-04.md`: Session outcomes and learnings
-- `.agent-logs/.gemini/GEMINI.md`: Gemini-specific context and conventions
-- `.agent-logs/.warp/WARP.md`: WARP terminal integration guide (includes all CLI commands)
+- `./docs/2025-10-04_deeper_research_repo_analysis.md`: Complete repository analysis (719 lines)
+- `./docs/_Deeper Research Synthetic - Complete Fix Checklist.md`: Bug inventory and fix plan (8 sections)
+- `./docs/Completed Tasks.md`: Task tracking and phase progress
+- `./docs/context.txt`: Session context and preferences
+- `./docs/changes/2025-10-03-bug-analysis.md`: Detailed bug report with fix strategies
+- `./docs/daily/chat_summary_2025-10-04.md`: Session outcomes and learnings
+- `./docs/.gemini/GEMINI.md`: Gemini-specific context and conventions
+- `./docs/.warp/WARP.md`: WARP terminal integration guide (includes all CLI commands)
 
 ## Development Philosophy
 
@@ -492,11 +492,11 @@ Per agent logs, this project follows a "foundation first" methodology:
 5. **Phase 5**: Documentation updates
 
 ### Agent Collaboration Patterns
-Previous agents have established these conventions (from `.agent-logs/`):
+Previous agents have established these conventions (from `./docs/`):
 - **Transparent reasoning**: Document decision-making in logs
 - **Scratchpad methodology**: Expose logic before implementation
 - **Agentic workflows**: Support user calibration and feedback
-- **Context preservation**: Maintain `.agent-logs/` for continuity
+- **Context preservation**: Maintain `./docs/` for continuity
 - **Meta-transparency**: Always explain "why" behind architectural choices
 
 ### User Preferences (from logs)
@@ -510,7 +510,7 @@ Previous agents have established these conventions (from `.agent-logs/`):
 - Requires explicit, correct tool usage (no syntax errors)
 
 ### Agent Operational Guidelines (from incident logs)
-**Critical Lessons** (from `.agent-logs/daily/chat_summary_2025-10-04.md`):
+**Critical Lessons** (from `./docs/daily/chat_summary_2025-10-04.md`):
 - Execute tool calls with correct syntax on first attempt
 - Learn from previous execution failures within session
 - Verify command structure before submission
@@ -556,4 +556,4 @@ curl http://localhost:3001/api/projects
 - SSE streams: DevTools → Network → EventStream
 - API failures: DevTools → Network → Response tab
 
-For complete command reference, see `.agent-logs/.warp/WARP.md`
+For complete command reference, see `./docs/.warp/WARP.md`

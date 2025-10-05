@@ -32,6 +32,7 @@ function App() {
     
     /** @type {[boolean, Function]} Whether project creation modal is open */
     const [isCreating, setIsCreating] = useState(false);
+    const [uiError, setUiError] = useState(null);
     
     /** @type {[string, Function]} Name input for new project */
     const [newProjectName, setNewProjectName] = useState('');
@@ -52,10 +53,15 @@ function App() {
     const fetchProjects = async () => {
         try {
             const response = await fetch(`${API_URL}/projects`);
+            if (!response.ok) {
+                throw new Error(`Fetch projects failed: ${response.status}`);
+            }
             const data = await response.json();
             setProjects(data);
+            setUiError(null);
         } catch (error) {
             console.error('Error fetching projects:', error);
+            setUiError('Failed to fetch projects');
         }
     };
 
@@ -74,14 +80,20 @@ function App() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: newProjectName, framework: newProjectFramework }),
             });
+            if (!response.ok) {
+                throw new Error(`Create project failed: ${response.status}`);
+            }
             const newProject = await response.json();
-            setProjects([...projects, newProject]);
+            // functional updates avoid stale closures
+            setProjects(prev => [...prev, newProject]);
             setNewProjectName('');
             setNewProjectFramework('PROJECT_DEEPDIVE');
-            setIsCreating(false);
             setSelectedProject(newProject);
+            setIsCreating(false);
+            setUiError(null);
         } catch (error) {
             console.error('Error creating project:', error);
+            setUiError('Failed to create project');
         }
     };
 
@@ -235,6 +247,11 @@ function App() {
             </aside>
 
             <main className="main-content">
+                {uiError && (
+                  <div role="alert" className="error-banner">
+                    {uiError}
+                  </div>
+                )}
                 <Workspace 
                     project={selectedProject} 
                     onUpdateContext={handleUpdateProjectContext}

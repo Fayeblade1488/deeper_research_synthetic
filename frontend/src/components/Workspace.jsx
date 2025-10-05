@@ -61,7 +61,7 @@ function Workspace({ project, onUpdateContext, onUpdateGeneratedContent, onDelet
     return (
         <div className="workspace">
             <div className="workspace-header">
-                <h2>{project.name}</h2>
+                <h2 data-testid="project-heading">{project.name}</h2>
                 <button 
                     className="delete-btn" 
                     onClick={() => onDeleteProject(project.id)}

@@ -102,7 +102,7 @@ app.get('/api/projects', (req, res) => {
  * @response {400} {Object} An error object indicating that the project name or framework is missing.
  */
 app.post('/api/projects', (req, res) => {
-    const { name, framework } = req.body;
+    const { name, framework } = req.body || {};
     if (!name || !framework) {
         return res.status(400).json({ error: 'Project name and framework are required.' });
     }
