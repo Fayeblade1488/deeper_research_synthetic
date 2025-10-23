@@ -1,4 +1,4 @@
-# 🔬 Deeper Research Synthetic
+# 🔬 Deeper Research Synthetic - Production-Ready Framework
 
 <div align="center">
 
@@ -7,6 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Security](https://img.shields.io/badge/security-hardened-green.svg)](./SECURITY.md)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./docs/CONTRIBUTING.md)
+[![Test Coverage](https://img.shields.io/badge/coverage-%3E85%25-brightgreen.svg)](./docs/TESTING_GUIDE.md)
 
 **🚀 AI-Powered Content Generation Framework with Multi-Modal Research Synthesis**
 
@@ -26,17 +27,19 @@
 - [🔧 Configuration](#-configuration)
 - [📚 Documentation](#-documentation)
 - [🛡️ Security](#️-security)
+- [🧪 Testing](#-testing)
+- [🚀 Production Deployment](#-production-deployment)
 - [🤝 Contributing](#-contributing)
 
 ## ✨ Features
 
 ### 🎓 **Multi-Framework Content Generation**
 - **PROJECT_DEEPDIVE**: Academic white papers with citations and research depth
-- **PROJECT_SYNTHETIC**: Narrative-driven podcast episodes with engaging storytelling
+- **PROJECT_SYNTHETIC**: Narrative podcast episodes with engaging storytelling
 - **PROJECT_BENCHMARK**: Data-driven risk assessments with DEFCON ratings
 
 ### 🧠 **Advanced AI Integration**
-- Powered by Google Gemini AI for sophisticated content generation
+- Powered by Venice.ai and Google Gemini AI for sophisticated content generation
 - Real-time streaming generation with Server-Sent Events (SSE)
 - Intelligent validation and quality assurance
 - Memory management and performance optimization
@@ -48,17 +51,23 @@
 - Secure API key handling
 
 ### 🎨 **Modern Tech Stack**
-- **Backend**: Node.js, Express.js, Jest Testing
-- **Frontend**: React 18, Vite, Modern ES6+
-- **AI**: Google Gemini Pro API
+- **Backend**: Node.js, Express.js, MongoDB, Mongoose ORM, Jest Testing
+- **Frontend**: React 18, Vite, Modern ES6+, React Context API
+- **AI**: Venice.ai API and Google Gemini Pro API
 - **Testing**: Comprehensive unit and integration tests
+
+### 📈 **Performance Monitoring**
+- Real-time performance metrics collection
+- Memory usage tracking and optimization
+- Request rate and error rate monitoring
+- Automated performance reporting
 
 ## 🏗️ Architecture
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   React Frontend │───▶│  Express API    │───▶│   Gemini AI     │
-│   (Port 5173)   │    │  (Port 3001)    │    │   Generation    │
+│   React Frontend │───▶│  Express API    │───▶│   AI Providers  │
+│   (Port 5173)   │    │  (Port 3001)    │    │   (Gemini/Venice)│
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
          ▼                       ▼                       ▼
@@ -76,20 +85,31 @@
 ```
 deeper-research-synthetic/
 ├── 📁 backend/                    # Express.js API server
+│   ├── 📁 api/                   # API versioned endpoints
+│   │   ├── 📁 v1/                # API v1 endpoints
+│   │   │   ├── 📁 controllers/    # Route controllers
+│   │   │   ├── 📁 middleware/   # Custom middleware
+│   │   │   ├── 📁 routes/        # API route definitions
+│   │   │   └── 📁 validators/    # Request validation
 │   ├── 📁 config/                # Configuration files
-│   ├── 📁 routes/                # API route handlers
+│   ├── 📁 data/                  # Data layer
+│   │   ├── 📁 models/           # Database models
+│   │   ├── 📁 repositories/     # Data access layer
+│   │   └── index.js             # Database connection
 │   ├── 📁 services/              # Business logic
-│   │   ├── frameworkService.js   # Framework management
-│   │   ├── generationService.js  # AI generation
-│   │   ├── validationService.js  # Content validation
-│   │   └── performanceService.js # Performance monitoring
+│   │   ├── core/                 # Core services
+│   │   ├── framework/            # Framework services
+│   │   ├── providers/            # AI provider integrations
+│   │   └── utils/                # Utility services
 │   ├── 📁 tests/                 # Backend tests
+│   ├── 📁 utils/                 # Utility functions
 │   ├── server.js                 # Express server entry
 │   └── package.json              # Dependencies
 ├── 📁 frontend/                   # React application
 │   ├── 📁 src/
 │   │   ├── 📁 components/        # React components
-│   │   ├── 📁 services/          # API client
+│   │   ├── 📁 context/           # React context providers
+│   │   ├── 📁 hooks/             # Custom React hooks
 │   │   └── App.jsx               # Main application
 │   ├── 📁 templates/             # UI templates
 │   ├── 📁 tests/                 # Frontend tests
@@ -128,7 +148,8 @@ See the [CODEOWNERS](./CODEOWNERS) file for specific path-based ownership assign
 
 ### Prerequisites
 - Node.js 14+ and npm
-- Google Gemini API key
+- Venice.ai API key or Google Gemini API key
+- MongoDB database (local or remote)
 - Ports 3001 (backend) and 5173 (frontend) available
 
 ### 1. Clone and Install
@@ -139,7 +160,7 @@ cd deeper_research_synthetic
 # Backend setup
 cd backend
 npm install
-cp .env.example .env  # Add your GEMINI_API_KEY
+cp .env.example .env  # Add your VENICE_API_KEY or GEMINI_API_KEY
 npm run dev
 
 # Frontend setup (new terminal)
@@ -151,7 +172,9 @@ npm run dev
 ### 2. Configure API Key
 Edit `backend/.env`:
 ```bash
-GEMINI_API_KEY=your_gemini_api_key_here
+AI_PROVIDER=venice  # or gemini
+VENICE_API_KEY=your_venice_api_key_here  # or GEMINI_API_KEY=your_gemini_api_key
+DATABASE_URL=mongodb://localhost:27017/deeper_research
 PORT=3001
 NODE_ENV=development
 ```
@@ -192,7 +215,10 @@ NODE_ENV=development
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `GEMINI_API_KEY` | Google Gemini API key | **Required** |
+| `AI_PROVIDER` | AI provider to use (venice, gemini) | `venice` |
+| `VENICE_API_KEY` | Venice.ai API key | **Required if using Venice** |
+| `GEMINI_API_KEY` | Google Gemini API key | **Required if using Gemini** |
+| `DATABASE_URL` | MongoDB connection string | `mongodb://localhost:27017/deeper_research` |
 | `PORT` | Backend server port | `3001` |
 | `NODE_ENV` | Environment mode | `development` |
 | `MAX_OUTPUT_TOKENS` | AI generation limit | `32000` |
@@ -216,6 +242,9 @@ NODE_ENV=development
 
 #### System Status
 - `GET /api/status` - Server health check
+- `GET /api/performance` - Performance metrics
+- `POST /api/performance/report` - Generate performance report
+- `PUT /api/performance/thresholds` - Update performance thresholds
 
 ## 📚 Documentation
 
@@ -228,6 +257,11 @@ NODE_ENV=development
 | [docs/TESTING_GUIDE.md](./docs/TESTING_GUIDE.md) | Testing procedures |
 | [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md) | Contribution guidelines |
 | [WARP.md](./WARP.md) | WARP.dev integration guide |
+| [MILESTONES.md](./MILESTONES.md) | Implementation milestones |
+| [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) | Project implementation summary |
+| [TEST_COVERAGE_PLAN.md](./TEST_COVERAGE_PLAN.md) | Test coverage expansion plan |
+| [PERFORMANCE_BENCHMARKING_IMPLEMENTATION.md](./PERFORMANCE_BENCHMARKING_IMPLEMENTATION.md) | Performance benchmarking implementation |
+| [SECURITY_AUDIT_PLAN.md](./SECURITY_AUDIT_PLAN.md) | Security audit plan |
 
 ## 🛡️ Security
 

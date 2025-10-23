@@ -1,15 +1,31 @@
-const { generateWithStreaming } = require("../config/gemini");
+const ProviderFactory = require("./providers/ProviderFactory");
 const { constructPrompt, getFrameworkMetadata } = require("./frameworkService");
 const { validateOutput } = require("./validationService");
 
+// Initialize AI provider from environment
+let aiProvider = null;
+
 /**
- * Generates content for a given project by constructing a prompt, streaming the output from the Gemini API, and validating the result.
+ * Get or initialize the AI provider
+ * @returns {AIProvider} Configured AI provider instance
+ */
+function getProvider() {
+  if (!aiProvider) {
+    aiProvider = ProviderFactory.createFromEnv();
+  }
+  return aiProvider;
+}
+
+/**
+ * Generates content for a given project by constructing a prompt, streaming the output from the AI provider, and validating the result.
  * This function orchestrates the entire content generation process, from input validation to final output.
+ * Supports multiple AI providers (Venice.ai, Gemini) with BYOK (Bring Your Own Key).
  *
  * @param {Object} project - The project object containing all necessary data for generation.
  * @param {string} project.framework - The framework type for the generation (e.g., PROJECT_DEEPDIVE).
  * @param {string} project.sourceContext - The source text or context to be used as input for the generation.
  * @param {string} project.name - The name of the project.
+ * @param {string} [project.provider] - Optional AI provider to use (venice, gemini). Defaults to environment setting.
  * @param {Function} onProgress - A callback function that is invoked with progress updates during the generation process.
  * The updates are sent as objects with a `type` property (e.g., 'progress', 'complete', 'error').
  *
@@ -35,6 +51,13 @@ async function generateContent(project, onProgress) {
   // Construct full prompt
   const prompt = await constructPrompt(framework, sourceContext);
 
+  // Get AI provider
+  const provider = getProvider();
+  const providerInfo = provider.getInfo();
+
+  console.log(`🤖 Using ${providerInfo.name} for generation`);
+  console.log(`🔒 Privacy: ${providerInfo.dataRetention}`);
+
   // Track generation progress
   let generatedText = "";
   let wordCount = 0;
@@ -42,26 +65,38 @@ async function generateContent(project, onProgress) {
 
   const startTime = Date.now();
 
-  // Generate with streaming
+  // Generate with streaming using provider
   try {
-    generatedText = await generateWithStreaming(prompt, (chunk) => {
-      chunkCount++;
-      generatedText += chunk;
-      wordCount = countWords(generatedText);
+    const result = await provider.generateWithStreaming({
+      prompt,
+      onProgress: (update) => {
+        chunkCount++;
 
-      // Send progress update every 10 chunks
-      if (chunkCount % 10 === 0 && onProgress) {
-        onProgress({
-          type: "progress",
-          wordCount,
-          chunkCount,
-          estimatedProgress: Math.min(
-            (wordCount / frameworkMeta.minWords) * 100,
-            95
-          ),
-        });
-      }
+        // For Venice/Gemini, accumulate content from progress updates
+        if (update.content) {
+          generatedText = update.content;
+          wordCount = countWords(generatedText);
+        }
+
+        // Send progress update every 10 chunks
+        if (chunkCount % 10 === 0 && onProgress) {
+          onProgress({
+            type: "progress",
+            wordCount,
+            chunkCount,
+            provider: update.provider || providerInfo.name,
+            estimatedProgress: Math.min(
+              (wordCount / frameworkMeta.minWords) * 100,
+              95
+            ),
+          });
+        }
+      },
+      context: [],
     });
+
+    // Use final content from provider result
+    generatedText = result.content;
 
     const endTime = Date.now();
     const duration = (endTime - startTime) / 1000; // seconds
@@ -91,6 +126,9 @@ async function generateContent(project, onProgress) {
         generationTime: duration,
         timestamp: new Date().toISOString(),
         validation,
+        provider: providerInfo.name,
+        privacyMode: providerInfo.privacyFocused ? "enabled" : "standard",
+        dataRetention: providerInfo.dataRetention,
       },
     };
   } catch (error) {
@@ -135,4 +173,5 @@ function countWords(text) {
 module.exports = {
   generateContent,
   countWords,
+  getProvider, // Export for testing
 };

@@ -25,7 +25,7 @@ const ReactGridLayout = WidthProvider(RGL);
  * @param {function} props.onUpdateGeneratedContent - A callback function to save the generated content and metadata.
  * @returns {JSX.Element} The rendered Synthetic layout.
  */
-function SyntheticLayout({ project, onUpdateGeneratedContent }) {
+function SyntheticLayout({ project, onUpdateGeneratedContent, onUpdateContext }) {
     const [generatedContent, setGeneratedContent] = useState(project.generatedContent || '');
     const [isGenerating, setIsGenerating] = useState(false);
 
@@ -74,6 +74,7 @@ function SyntheticLayout({ project, onUpdateGeneratedContent }) {
             <div key="a">
                 <SourcePanel 
                     project={project} 
+                    onSaveContext={onUpdateContext}
                     title="Source Input"
                     description="Provide the source material for the synthetic content generation"
                 />
@@ -83,6 +84,7 @@ function SyntheticLayout({ project, onUpdateGeneratedContent }) {
                     project={project} 
                     content={generatedContent} 
                     isGenerating={isGenerating}
+                    onSaveDraft={(projectId, draft) => onUpdateGeneratedContent(projectId, draft, null)}
                     title="Generated Draft"
                     description="The generated synthetic content will appear here"
                 />

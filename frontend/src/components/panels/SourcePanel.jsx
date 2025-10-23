@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 /**
  * The source panel component.
@@ -20,7 +21,7 @@ import React, { useState, useEffect } from 'react';
  * @param {string} [props.description="Enter source material for generation"] - The description to display in the panel.
  * @returns {JSX.Element} The rendered source panel.
  */
-function SourcePanel({ project, title = "Source Context", description = "Enter source material for generation" }) {
+function SourcePanel({ project, onSaveContext, title = "Source Context", description = "Enter source material for generation" }) {
     const [sourceContext, setSourceContext] = useState(project?.sourceContext || '');
     const [isEditing, setIsEditing] = useState(false);
 
@@ -31,13 +32,17 @@ function SourcePanel({ project, title = "Source Context", description = "Enter s
     const handleSave = async () => {
         if (project && sourceContext !== project.sourceContext) {
             try {
-                const response = await fetch(`http://localhost:3001/api/projects/${project.id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sourceContext }),
-                });
-                if (!response.ok) {
-                    throw new Error('Failed to save source context');
+                if (onSaveContext) {
+                    await onSaveContext(project.id, sourceContext);
+                } else {
+                    const response = await fetch(`${API_URL}/projects/${project.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sourceContext }),
+                    });
+                    if (!response.ok) {
+                        throw new Error('Failed to save source context');
+                    }
                 }
                 setIsEditing(false);
             } catch (error) {

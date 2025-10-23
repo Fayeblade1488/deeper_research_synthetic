@@ -25,7 +25,7 @@ const ReactGridLayout = WidthProvider(RGL);
  * @param {function} props.onUpdateGeneratedContent - A callback function to save the generated content and metadata.
  * @returns {JSX.Element} The rendered Benchmark layout.
  */
-function BenchmarkLayout({ project, onUpdateGeneratedContent }) {
+function BenchmarkLayout({ project, onUpdateGeneratedContent, onUpdateContext }) {
     const [generatedContent, setGeneratedContent] = useState(project.generatedContent || '');
     const [isGenerating, setIsGenerating] = useState(false);
 
@@ -74,6 +74,7 @@ function BenchmarkLayout({ project, onUpdateGeneratedContent }) {
             <div key="a">
                 <SourcePanel 
                     project={project} 
+                    onSaveContext={onUpdateContext}
                     title="Benchmark Source Data"
                     description="Input the data and metrics for the benchmark analysis"
                 />
@@ -83,6 +84,7 @@ function BenchmarkLayout({ project, onUpdateGeneratedContent }) {
                     project={project} 
                     content={generatedContent} 
                     isGenerating={isGenerating}
+                    onSaveDraft={(projectId, draft) => onUpdateGeneratedContent(projectId, draft, null)}
                     title="Analysis Results"
                     description="Benchmark analysis and DEFCON assessment will be generated here"
                 />

@@ -25,7 +25,7 @@ const ReactGridLayout = WidthProvider(RGL);
  * @param {function} props.onUpdateGeneratedContent - A callback function to save the generated content and metadata.
  * @returns {JSX.Element} The rendered Deepdive layout.
  */
-function DeepdiveLayout({ project, onUpdateGeneratedContent }) {
+function DeepdiveLayout({ project, onUpdateGeneratedContent, onUpdateContext }) {
     const [generatedContent, setGeneratedContent] = useState(project.generatedContent || '');
     const [isGenerating, setIsGenerating] = useState(false);
 
@@ -71,12 +71,13 @@ function DeepdiveLayout({ project, onUpdateGeneratedContent }) {
 
     return (
         <ReactGridLayout className="layout" layout={layout} cols={12} rowHeight={30} >
-            <div key="a"><SourcePanel project={project} /></div>
+            <div key="a"><SourcePanel project={project} onSaveContext={onUpdateContext} /></div>
             <div key="b">
                 <DraftPanel 
                     project={project} 
                     content={generatedContent} 
                     isGenerating={isGenerating}
+                    onSaveDraft={(projectId, draft) => onUpdateGeneratedContent(projectId, draft, null)}
                 />
             </div>
             <div key="c">

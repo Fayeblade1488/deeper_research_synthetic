@@ -42,16 +42,19 @@ function Workspace({ project, onUpdateContext, onUpdateGeneratedContent, onDelet
                 return <DeepdiveLayout 
                     project={project} 
                     onUpdateGeneratedContent={onUpdateGeneratedContent} 
+                    onUpdateContext={onUpdateContext}
                 />;
             case 'PROJECT_SYNTHETIC':
                 return <SyntheticLayout 
                     project={project} 
                     onUpdateGeneratedContent={onUpdateGeneratedContent} 
+                    onUpdateContext={onUpdateContext}
                 />;
             case 'PROJECT_BENCHMARK':
                 return <BenchmarkLayout 
                     project={project} 
                     onUpdateGeneratedContent={onUpdateGeneratedContent} 
+                    onUpdateContext={onUpdateContext}
                 />;
             default:
                 return <div>Unknown project framework.</div>;

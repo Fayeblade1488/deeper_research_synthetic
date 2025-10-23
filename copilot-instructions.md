@@ -1,15 +1,18 @@
-# Copilot Instructions for Deeper Research Synthetic
+# WARP.md
 
-## 🚀 Quick Start for New Agents
+This file provides guidance to WARP (warp.dev) when working with code in this repository.
 
-**First Time Here?** Read these files in order:
-1. This file (overview and patterns)
-2. `./docs/context.txt` (5-minute read: core project understanding)
-3. `./docs/_Deeper Research Synthetic - Complete Fix Checklist.md` (comprehensive task list)
-4. `./docs/2025-10-04_deeper_research_repo_analysis.md` (deep dive when needed)
-5. `./docs/.warp/WARP.md` (all CLI commands)
+## Project Quick Facts
 
-**Current Priority**: Fix CI/CD blockers first (see Bug Fix Priority Diagram below)
+| Aspect | Details |
+|--------|----------|
+| **Name** | Deeper Research Synthetic (Initiative IRONCLAD) |
+| **Type** | AI-powered content generation framework |
+| **Language** | JavaScript/Node.js (CommonJS) + React 19 |
+| **Architecture** | Express API + React SPA |
+| **Backend Port** | 3001 |
+| **Frontend Port** | 5173 |
+| **AI Provider** | Gemini 2.0 Flash (BYOK support: Venice.ai, Gemini, OpenAI) |
 
 ## Project Overview
 AI-powered content generation framework transforming raw source material into three output types: academic papers (PROJECT_DEEPDIVE), podcast scripts (PROJECT_SYNTHETIC), and risk assessments (PROJECT_BENCHMARK). Codenamed "THE FORGE" (backend) and "THE LENS" (frontend).

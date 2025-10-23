@@ -387,6 +387,31 @@ class PerformanceMonitor extends EventEmitter {
             status: this.determineSystemStatus()
         };
     }
+    
+    /**
+     * Returns the current performance metrics asynchronously to prevent blocking.
+     *
+     * @returns {Promise<Object>} A promise that resolves to an object containing the current performance metrics.
+     */
+    async getMetricsAsync() {
+        // Use setImmediate to ensure this doesn't block the event loop
+        return new Promise((resolve) => {
+            setImmediate(() => {
+                const currentMemory = process.memoryUsage();
+                
+                resolve({
+                    ...this.metrics,
+                    currentMemory: {
+                        rss: Math.round(currentMemory.rss / 1024 / 1024),
+                        heapUsed: Math.round(currentMemory.heapUsed / 1024 / 1024),
+                        heapTotal: Math.round(currentMemory.heapTotal / 1024 / 1024)
+                    },
+                    uptime: Date.now() - this.metrics.startTime,
+                    status: this.determineSystemStatus()
+                });
+            });
+        });
+    }
 
     /**
      * Resets all performance metrics to their initial values.

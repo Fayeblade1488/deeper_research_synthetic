@@ -1,12 +1,12 @@
 {
   "name": "backend",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "THE FORGE - Backend for Initiative: IRONCLAD",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "lint": "echo 'No linting configured yet'",
+    "lint": "eslint .",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch --passWithNoTests",
     "test:coverage": "jest --coverage --passWithNoTests",
@@ -16,7 +16,8 @@
     "ironclad",
     "research",
     "ai",
-    "gemini"
+    "gemini",
+    "venice"
   ],
   "author": "Paradroid AI",
   "license": "ISC",
@@ -25,11 +26,14 @@
     "@google/generative-ai": "^0.21.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "mongoose": "^8.8.0",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "jest": "^30.2.0",
     "nodemon": "^3.1.9",
-    "supertest": "^7.1.4"
+    "supertest": "^7.1.4",
+    "eslint": "^9.15.0"
   }
 }

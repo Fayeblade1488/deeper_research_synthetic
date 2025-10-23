@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3001/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 /**
  * @file This file contains the API service for "THE LENS" frontend, which handles all communication with "THE FORGE" backend.
