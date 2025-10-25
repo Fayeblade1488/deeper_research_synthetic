@@ -292,14 +292,60 @@ npm test -- --testNamePattern="Generation Routes"
 
 ## 🚀 Production Deployment
 
-See [docs/DEPLOYMENT_GUIDE.md](./docs/DEPLOYMENT_GUIDE.md) for comprehensive deployment instructions including:
+### Docker Deployment (Recommended)
 
-- Docker containerization
-- Environment configuration
-- SSL/TLS setup
-- Process management (PM2)
-- Reverse proxy configuration
-- Monitoring and logging
+The fastest way to deploy to production:
+
+```bash
+# 1. Configure environment
+cp .env.production .env
+# Edit .env with your API keys and MongoDB password
+
+# 2. Deploy with one command
+./deploy.sh
+```
+
+**What's included:**
+- ✅ MongoDB database with persistent storage
+- ✅ Backend API with health checks
+- ✅ Frontend with Nginx reverse proxy
+- ✅ Automatic service orchestration
+- ✅ Health monitoring and auto-restart
+- ✅ Production-optimized builds
+
+**Access your application:**
+- Frontend: http://localhost:8080
+- Backend API: http://localhost:3001
+- MongoDB: localhost:27017
+
+### Manual Deployment
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for:
+- ☁️ Cloud deployment (AWS ECS, GCP Cloud Run, DigitalOcean)
+- 🔧 PM2 process management without Docker
+- 🔐 HTTPS/SSL configuration with Let's Encrypt
+- 📈 Horizontal and vertical scaling strategies
+- 💾 Database backup and recovery procedures
+- 📊 Production monitoring and alerting
+
+### Available Scripts
+
+```bash
+./setup.sh          # Initial setup and dependency installation
+./deploy.sh         # Production deployment with Docker
+./backup.sh         # MongoDB database backup (keeps last 7)
+./health-check.sh   # Health check all services
+```
+
+### Production Checklist
+
+- [ ] Set strong `MONGO_ROOT_PASSWORD` in `.env`
+- [ ] Add your AI API key (`VENICE_API_KEY` or `GEMINI_API_KEY`)
+- [ ] Configure firewall rules (allow ports 8080, 3001, 27017)
+- [ ] Set up SSL/TLS certificates for HTTPS
+- [ ] Configure automated backups (cron job for `./backup.sh`)
+- [ ] Set up monitoring and alerting
+- [ ] Review security settings in [SECURITY.md](./SECURITY.md)
 
 ## 🤝 Contributing
 

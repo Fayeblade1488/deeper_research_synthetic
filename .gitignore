@@ -121,6 +121,15 @@ backend/generated/
 *.sqlite
 *.sqlite3
 *.db
+data/db/
+
+# --- Docker ---
+*.log
+docker-compose.override.yml
+
+# --- Backups ---
+backups/
+*.tar.gz
 
 # --- Optional: Keep example files ---
 !.env.example

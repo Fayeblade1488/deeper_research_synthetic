@@ -1,0 +1,67 @@
+version: '3.8'
+
+# Development Docker Compose configuration with hot-reload
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: deeper-research-mongodb-dev
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: devpassword
+      MONGO_INITDB_DATABASE: deeperresearch_dev
+    volumes:
+      - mongodb_dev_data:/data/db
+    networks:
+      - deeper-research-dev-network
+    ports:
+      - "27017:27017"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../Dockerfile.backend
+    container_name: deeper-research-backend-dev
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      MONGODB_URI: mongodb://admin:devpassword@mongodb:27017/deeperresearch_dev?authSource=admin
+      AI_PROVIDER: ${AI_PROVIDER:-venice}
+      VENICE_API_KEY: ${VENICE_API_KEY}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      - mongodb
+    networks:
+      - deeper-research-dev-network
+    ports:
+      - "3001:3001"
+    command: npm run dev
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../Dockerfile.frontend
+      target: builder
+    container_name: deeper-research-frontend-dev
+    environment:
+      VITE_API_URL: http://localhost:3001
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - deeper-research-dev-network
+    ports:
+      - "5173:5173"
+    command: npm run dev -- --host
+
+networks:
+  deeper-research-dev-network:
+    driver: bridge
+
+volumes:
+  mongodb_dev_data:
+    driver: local
