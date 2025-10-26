@@ -148,3 +148,4 @@ backups/
 
 .gemini/
 gha-creds-*.json
+**/node_modules/
