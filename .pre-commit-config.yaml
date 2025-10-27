@@ -1,0 +1,191 @@
+# Pre-commit hooks configuration
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+# See: https://pre-commit.com
+
+default_stages: [commit]
+fail_fast: false
+
+repos:
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        name: Trim trailing whitespace
+        types: [text]
+
+      - id: end-of-file-fixer
+        name: Fix end of file
+        types: [text]
+
+      - id: check-yaml
+        name: Validate YAML
+        types: [yaml]
+        args: ['--unsafe']
+
+      - id: check-json
+        name: Validate JSON
+        types: [json]
+
+      - id: check-toml
+        name: Validate TOML
+        types: [toml]
+
+      - id: check-merge-conflict
+        name: Check for merge conflicts
+        types: [text]
+
+      - id: detect-private-key
+        name: Detect private keys
+        types: [text]
+
+      - id: check-case-conflict
+        name: Check for case conflicts
+        types: [text]
+
+      - id: check-added-large-files
+        name: Check for large files
+        args: ['--maxkb=500']
+
+  # Secret detection
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        name: Detect secrets
+        args: ['--baseline', '.secrets.baseline']
+        types: [text]
+
+  # Git checks
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: 3.12.0
+    hooks:
+      - id: commitizen
+        name: Validate commit message
+        stages: [commit-msg]
+
+  # JavaScript/TypeScript
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v8.54.0
+    hooks:
+      - id: eslint
+        name: ESLint
+        types: [javascript, jsx, typescript, tsx]
+        additional_dependencies:
+          - eslint
+          - '@typescript-eslint/eslint-plugin'
+          - '@typescript-eslint/parser'
+        args: ['--fix', '--max-warnings=0']
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        name: Prettier
+        types_or: [javascript, jsx, typescript, tsx, json, yaml, markdown]
+        additional_dependencies: [prettier]
+
+  # Markdown
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.37.0
+    hooks:
+      - id: markdownlint
+        name: Markdown linting
+        types: [markdown]
+        args: ['--config', '.markdownlint.json']
+
+  # YAML
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.33.0
+    hooks:
+      - id: yamllint
+        name: YAML linting
+        types: [yaml]
+        args: [--config-file, .yamllint.yml]
+
+  # Shell scripts
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.6
+    hooks:
+      - id: shellcheck
+        name: ShellCheck
+        types: [shell]
+
+  # Docker
+  - repo: https://github.com/hadialqattan/dockerfilelint-precommit
+    rev: v0.1.0
+    hooks:
+      - id: dockerfilelint
+        name: Dockerfile linting
+        types: [dockerfile]
+
+  # Security
+  - repo: https://github.com/PyCQA/bandit
+    rev: '1.7.5'
+    hooks:
+      - id: bandit
+        name: Bandit security check
+        types: [python]
+        args: ['-ll']
+        exclude: ^tests/
+
+  # License headers (optional)
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.4
+    hooks:
+      - id: insert-license
+        name: Insert license header
+        files: \.(js|ts|jsx|tsx|py)$
+        args:
+          - --license-filepath
+          - LICENSE
+          - --comment-style
+          - //
+        exclude: ^(node_modules|\.venv|build)/
+
+# Local hooks for custom validation
+  - repo: local
+    hooks:
+      - id: check-env-files
+        name: Check environment files
+        entry: bash -c 'for f in backend frontend; do if [ -f "$f/.env.example" ] && [ ! -f "$f/.env" ]; then echo "Missing $f/.env"; exit 1; fi; done'
+        language: system
+        always_run: true
+        pass_filenames: false
+
+      - id: check-package-versions
+        name: Check package.json versions match
+        entry: bash -c 'BACKEND=$(grep "\"version\"" backend/package.json | head -1 | sed "s/.*\"version\": \"\(.*\)\".*/\1/"); FRONTEND=$(grep "\"version\"" frontend/package.json | head -1 | sed "s/.*\"version\": \"\(.*\)\".*/\1/"); if [ "$BACKEND" != "$FRONTEND" ]; then echo "Version mismatch: backend=$BACKEND, frontend=$FRONTEND"; exit 1; fi'
+        language: system
+        files: package.json
+        pass_filenames: false
+
+      - id: check-no-console-logs
+        name: Check for console.log in production code
+        entry: bash -c 'grep -r "console\." backend/src frontend/src --include="*.js" --include="*.ts" --include="*.jsx" --include="*.tsx" | grep -v "console.error" | grep -v "console.warn" | grep -v "console.info" | grep -v "test" && exit 1 || exit 0'
+        language: system
+        types: [javascript, typescript]
+        pass_filenames: false
+
+# Exclude large directories
+exclude: |
+  (?x)^(
+    node_modules|
+    .venv|
+    build|
+    dist|
+    coverage|
+    __pycache__|
+    \.git|
+    \.pytest_cache|
+    \.vscode|
+    \.idea
+  )/
+
+# Files to ignore
+files: ''
+exclude_types: [image, binary]
+
+# Performance settings
+minimum_pre_commit_version: '2.18.0'

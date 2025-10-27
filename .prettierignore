@@ -1,0 +1,16 @@
+# EditorConfig-ignore patterns
+# Files to exclude from formatting and linting
+
+node_modules/
+dist/
+build/
+.git/
+.venv/
+__pycache__/
+*.egg-info/
+coverage/
+.pytest_cache/
+.tox/
+*.pyc
+.DS_Store
+*.log

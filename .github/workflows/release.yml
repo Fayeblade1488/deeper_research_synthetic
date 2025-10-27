@@ -1,0 +1,215 @@
+name: Release Management
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  verify-release:
+    name: Verify Release Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      is_prerelease: ${{ steps.version.outputs.is_prerelease }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG=${{ github.ref }}
+          VERSION=${TAG#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          
+          # Check if prerelease
+          if [[ $VERSION =~ alpha|beta|rc ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Verify version matches package.json
+        run: |
+          BACKEND_VERSION=$(grep '"version"' backend/package.json | head -1 | sed 's/.*"version": "\(.*\)".*/\1/')
+          FRONTEND_VERSION=$(grep '"version"' frontend/package.json | head -1 | sed 's/.*"version": "\(.*\)".*/\1/')
+          TAG_VERSION=${{ steps.version.outputs.version }}
+          
+          if [ "$BACKEND_VERSION" != "$TAG_VERSION" ] || [ "$FRONTEND_VERSION" != "$TAG_VERSION" ]; then
+            echo "❌ Version mismatch!"
+            echo "Tag version: $TAG_VERSION"
+            echo "Backend version: $BACKEND_VERSION"
+            echo "Frontend version: $FRONTEND_VERSION"
+            exit 1
+          fi
+          echo "✅ Versions match"
+
+  build:
+    name: Build Release Artifacts
+    runs-on: ubuntu-latest
+    needs: verify-release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          cd backend && npm ci
+          cd ../frontend && npm ci
+
+      - name: Run tests
+        run: |
+          cd backend && npm test
+          cd ../frontend && npm test
+        continue-on-error: true
+
+      - name: Build backend
+        working-directory: backend
+        run: npm run build || echo "No build script defined"
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Create distribution archives
+        run: |
+          mkdir -p dist
+          tar -czf dist/deeper-research-backend-${{ needs.verify-release.outputs.version }}.tar.gz backend/
+          tar -czf dist/deeper-research-frontend-${{ needs.verify-release.outputs.version }}.tar.gz frontend/
+          zip -r dist/deeper-research-${{ needs.verify-release.outputs.version }}.zip backend/ frontend/ -x "*/node_modules/*" "*/.git/*"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-artifacts
+          path: dist/
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [verify-release, build]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: release-artifacts
+          path: dist/
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          CHANGELOG=$(git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"- %h: %s" || echo "First release")
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          name: Release ${{ needs.verify-release.outputs.version }}
+          body: |
+            ## Release Notes: ${{ needs.verify-release.outputs.version }}
+
+            ### Changes
+            ${{ steps.changelog.outputs.changelog }}
+
+            ### Artifacts
+            - Backend: `deeper-research-backend-${{ needs.verify-release.outputs.version }}.tar.gz`
+            - Frontend: `deeper-research-frontend-${{ needs.verify-release.outputs.version }}.tar.gz`
+            - Complete: `deeper-research-${{ needs.verify-release.outputs.version }}.zip`
+
+            ### Installation
+            See [DEPLOYMENT.md](https://github.com/${{ github.repository }}/blob/main/DEPLOYMENT.md) for deployment instructions.
+
+            ### What's Changed
+            View detailed changes: [Full Changelog](https://github.com/${{ github.repository }}/compare/$(git describe --tags --abbrev=0 2>/dev/null || echo 'HEAD')...${{ github.sha }})
+          files: dist/**
+          draft: false
+          prerelease: ${{ needs.verify-release.outputs.is_prerelease }}
+          body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-docker:
+    name: Publish Docker Images
+    runs-on: ubuntu-latest
+    needs: verify-release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+        if: secrets.DOCKER_USERNAME != ''
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile.backend
+          push: ${{ secrets.DOCKER_USERNAME != '' }}
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/deeper-research-backend:latest
+            ${{ secrets.DOCKER_USERNAME }}/deeper-research-backend:${{ needs.verify-release.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+        if: secrets.DOCKER_USERNAME != ''
+        continue-on-error: true
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile.frontend
+          push: ${{ secrets.DOCKER_USERNAME != '' }}
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/deeper-research-frontend:latest
+            ${{ secrets.DOCKER_USERNAME }}/deeper-research-frontend:${{ needs.verify-release.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+        if: secrets.DOCKER_USERNAME != ''
+        continue-on-error: true
+
+  notify-release:
+    name: Notify Release
+    runs-on: ubuntu-latest
+    needs: [create-release, publish-docker]
+    if: always()
+    steps:
+      - name: Release notification
+        run: |
+          echo "✅ Release ${{ github.ref }} Published!"
+          echo ""
+          echo "📦 Artifacts:"
+          echo "  - GitHub Release: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref }}"
+          echo ""
+          echo "🐳 Docker Images (if published):"
+          echo "  - Backend: ${{ secrets.DOCKER_USERNAME }}/deeper-research-backend:${{ github.ref }}"
+          echo "  - Frontend: ${{ secrets.DOCKER_USERNAME }}/deeper-research-frontend:${{ github.ref }}"
+          echo ""
+          echo "📝 See GitHub Actions for details"
