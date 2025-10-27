@@ -1,0 +1,33 @@
+# CODEOWNERS
+# This file defines which users are responsible for which parts of the codebase.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global owners (entire repository)
+* @Fayeblade1488
+
+# Backend code
+backend/** @Fayeblade1488
+
+# Frontend code
+frontend/** @Fayeblade1488
+
+# Infrastructure and deployment
+docker-compose*.yml @Fayeblade1488
+Dockerfile* @Fayeblade1488
+nginx.conf @Fayeblade1488
+deploy.sh @Fayeblade1488
+setup.sh @Fayeblade1488
+backup.sh @Fayeblade1488
+health-check.sh @Fayeblade1488
+ecosystem.config.js @Fayeblade1488
+.github/workflows/ @Fayeblade1488
+
+# Documentation
+*.md @Fayeblade1488
+docs/ @Fayeblade1488
+legal/ @Fayeblade1488
+
+# Configuration
+.env* @Fayeblade1488
+.github/ @Fayeblade1488
+.dockerignore @Fayeblade1488
