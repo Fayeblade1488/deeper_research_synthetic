@@ -7,25 +7,87 @@
 require('dotenv').config();
 
 /**
+ * Utility function to safely parse environment variables with validation
+ */
+function getEnvNumber(key, defaultValue, min, max) {
+  const value = process.env[key];
+  if (!value) return defaultValue;
+  
+  const num = parseInt(value, 10);
+  if (isNaN(num)) {
+    throw new Error(`${key} must be a valid number, got: ${value}`);
+  }
+  
+  if (min !== undefined && num < min) {
+    throw new Error(`${key} must be >= ${min}, got: ${num}`);
+  }
+  
+  if (max !== undefined && num > max) {
+    throw new Error(`${key} must be <= ${max}, got: ${num}`);
+  }
+  
+  return num;
+}
+
+function getEnvFloat(key, defaultValue, min, max) {
+  const value = process.env[key];
+  if (!value) return defaultValue;
+  
+  const num = parseFloat(value);
+  if (isNaN(num)) {
+    throw new Error(`${key} must be a valid number, got: ${value}`);
+  }
+  
+  if (min !== undefined && num < min) {
+    throw new Error(`${key} must be >= ${min}, got: ${num}`);
+  }
+  
+  if (max !== undefined && num > max) {
+    throw new Error(`${key} must be <= ${max}, got: ${num}`);
+  }
+  
+  return num;
+}
+
+function getEnvString(key, defaultValue, allowedValues = null) {
+  const value = process.env[key] || defaultValue;
+  if (!value) {
+    throw new Error(`${key} is required but not set`);
+  }
+  
+  if (allowedValues && !allowedValues.includes(value)) {
+    throw new Error(`${key} must be one of [${allowedValues.join(', ')}], got: ${value}`);
+  }
+  
+  return value;
+}
+
+function getEnvBoolean(key, defaultValue) {
+  const value = process.env[key];
+  if (!value) return defaultValue;
+  return value.toLowerCase() === 'true';
+}
+
+/**
  * Application configuration
  */
 const config = {
   // Server configuration
   server: {
-    port: parseInt(process.env.PORT) || 3001,
+    port: getEnvNumber('PORT', 3001, 1024, 65535),
     host: process.env.HOST || 'localhost',
-    nodeEnv: process.env.NODE_ENV || 'development',
+    nodeEnv: getEnvString('NODE_ENV', 'development', ['development', 'staging', 'production']),
   },
 
   // Database configuration
   database: {
     url: process.env.DATABASE_URL || 'mongodb://localhost:27017/deeper_research',
-    dialect: process.env.DB_DIALECT || 'mongodb',
+    dialect: getEnvString('DB_DIALECT', 'mongodb', ['mongodb']),
   },
 
   // AI Provider configuration
   ai: {
-    provider: process.env.AI_PROVIDER || process.env.PROVIDER || 'venice',
+    provider: getEnvString('AI_PROVIDER', process.env.PROVIDER || 'venice', ['venice', 'gemini']),
     venice: {
       apiKey: process.env.VENICE_API_KEY,
       baseUrl: process.env.VENICE_BASE_URL || 'https://api.venice.ai/api/v1',
@@ -34,37 +96,37 @@ const config = {
       apiKey: process.env.GEMINI_API_KEY,
       baseUrl: process.env.GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta',
     },
-    // Common AI parameters
-    temperature: parseFloat(process.env.TEMPERATURE) || 0.7,
-    maxTokens: parseInt(process.env.MAX_OUTPUT_TOKENS) || 32000,
-    topP: parseFloat(process.env.TOP_P) || 0.95,
-    topK: parseInt(process.env.TOP_K) || 40,
+    // Common AI parameters with validation
+    temperature: getEnvFloat('TEMPERATURE', 0.7, 0, 2),
+    maxTokens: getEnvNumber('MAX_OUTPUT_TOKENS', 32000, 1000, 100000),
+    topP: getEnvFloat('TOP_P', 0.95, 0, 1),
+    topK: getEnvNumber('TOP_K', 40, 1, 100),
   },
 
   // Security configuration
   security: {
     cors: {
       origin: process.env.CORS_ORIGIN || '*',
-      credentials: process.env.CORS_CREDENTIALS === 'true',
+      credentials: getEnvBoolean('CORS_CREDENTIALS', false),
     },
     rateLimiting: {
-      windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
-      max: parseInt(process.env.RATE_LIMIT_MAX) || 100, // limit each IP to 100 requests per windowMs
+      windowMs: getEnvNumber('RATE_LIMIT_WINDOW_MS', 15 * 60 * 1000, 1000, 3600000),
+      max: getEnvNumber('RATE_LIMIT_MAX', 100, 1, 10000),
     },
   },
 
   // Performance monitoring
   performance: {
-    maxMemoryMB: parseInt(process.env.MAX_MEMORY_MB) || 512,
-    maxActiveGenerations: parseInt(process.env.MAX_ACTIVE_GENERATIONS) || 10,
-    maxErrorRate: parseFloat(process.env.MAX_ERROR_RATE) || 0.1,
-    maxResponseTime: parseInt(process.env.MAX_RESPONSE_TIME) || 30000,
+    maxMemoryMB: getEnvNumber('MAX_MEMORY_MB', 512, 128, 4096),
+    maxActiveGenerations: getEnvNumber('MAX_ACTIVE_GENERATIONS', 10, 1, 100),
+    maxErrorRate: getEnvFloat('MAX_ERROR_RATE', 0.1, 0, 1),
+    maxResponseTime: getEnvNumber('MAX_RESPONSE_TIME', 30000, 1000, 300000),
   },
 
   // Logging configuration
   logging: {
-    level: process.env.LOG_LEVEL || 'info',
-    format: process.env.LOG_FORMAT || 'json',
+    level: getEnvString('LOG_LEVEL', 'info', ['debug', 'info', 'warn', 'error']),
+    format: getEnvString('LOG_FORMAT', 'json', ['json', 'text']),
   },
 };
 
@@ -89,9 +151,18 @@ function validateConfig() {
   if (required.length > 0) {
     throw new Error(`Missing required environment variables: ${required.join(', ')}`);
   }
+  
+  // Validate config is complete
+  if (!config.database.url) {
+    throw new Error('DATABASE_URL is required');
+  }
 }
 
 module.exports = {
   config,
   validateConfig,
+  getEnvNumber,
+  getEnvFloat,
+  getEnvString,
+  getEnvBoolean,
 };

@@ -17,53 +17,80 @@ class DatabaseConnection {
   }
 
   /**
-   * Connect to database
+   * Connect to database with retry logic
+   * @param {number} maxRetries - Maximum number of connection attempts (default: 3)
    * @returns {Promise<void>}
    */
-  async connect() {
+  async connect(maxRetries = 3) {
     if (this.isConnected) {
       logger.info('Already connected to database');
       return;
     }
 
-    try {
-      logger.info('Connecting to database', { url: config.database.url });
-      
-      // Configure mongoose
-      mongoose.set('strictQuery', false);
-      
-      // Connect to database
-      this.connection = await mongoose.connect(config.database.url, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        // Retry configuration
-        serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-        socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-      });
+    let lastError;
 
-      this.isConnected = true;
-      logger.info('Connected to database successfully');
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        logger.info(`Connecting to database (attempt ${attempt}/${maxRetries})`, {
+          url: config.database.url
+        });
+        
+        // Configure mongoose
+        mongoose.set('strictQuery', false);
+        
+        // Connect to database
+        this.connection = await mongoose.connect(config.database.url, {
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+          serverSelectionTimeoutMS: 5000,
+          socketTimeoutMS: 45000,
+          retryWrites: true,
+          w: 'majority',
+        });
 
-      // Handle connection events
-      mongoose.connection.on('error', (err) => {
-        logger.error('Database connection error', { error: err.message });
-      });
+        // Validate connection is working
+        await mongoose.connection.db.admin().ping();
+        
+        this.isConnected = true;
+        logger.info('Connected to database successfully');
 
-      mongoose.connection.on('disconnected', () => {
-        logger.warn('Database disconnected');
-        this.isConnected = false;
-      });
+        // Handle connection events
+        mongoose.connection.on('error', (err) => {
+          logger.error('Database connection error', { error: err.message });
+        });
 
-      // Handle process termination
-      process.on('SIGINT', async () => {
-        await this.disconnect();
-        process.exit(0);
-      });
+        mongoose.connection.on('disconnected', () => {
+          logger.warn('Database disconnected');
+          this.isConnected = false;
+        });
 
-    } catch (error) {
-      logger.error('Failed to connect to database', { error: error.message });
-      throw error;
+        // Handle process termination
+        process.on('SIGINT', async () => {
+          await this.disconnect();
+          process.exit(0);
+        });
+
+        return; // Success, exit the retry loop
+      } catch (error) {
+        lastError = error;
+        logger.warn(`Database connection attempt ${attempt} failed`, {
+          error: error.message,
+          retriesLeft: maxRetries - attempt
+        });
+
+        if (attempt < maxRetries) {
+          // Wait before retrying with exponential backoff
+          const delayMs = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
+          logger.info(`Retrying in ${delayMs}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+      }
     }
+
+    // All retries exhausted
+    const errorMsg = `Failed to connect to database after ${maxRetries} attempts: ${lastError?.message}`;
+    logger.error(errorMsg);
+    throw new Error(errorMsg);
   }
 
   /**

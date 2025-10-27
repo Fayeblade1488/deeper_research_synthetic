@@ -53,19 +53,53 @@ class ProjectRepository {
   }
 
   /**
-   * Create a new project
+   * Create a new project with race condition protection
    * @param {Object} projectData - Project data
    * @returns {Promise<Object>} Created project object
    */
   async create(projectData) {
+    const session = await require('mongoose').startSession();
+    session.startTransaction();
+
     try {
+      // Check if project with same name already exists (prevents race condition)
+      const existing = await Project.findOne(
+        { name: projectData.name, deletedAt: null },
+        null,
+        { session }
+      );
+
+      if (existing) {
+        await session.abortTransaction();
+        throw new Error(`Project with name "${projectData.name}" already exists`);
+      }
+
+      // Create and save the project within transaction
       const project = new Project(projectData);
-      const savedProject = await project.save();
-      logger.info('Created project', { id: savedProject.id, name: savedProject.name });
+      const savedProject = await project.save({ session });
+
+      // Commit transaction
+      await session.commitTransaction();
+
+      logger.info('Created project', { 
+        id: savedProject.id, 
+        name: savedProject.name,
+        message: 'Transaction committed successfully'
+      });
+
       return savedProject;
     } catch (error) {
-      logger.error('Error creating project', { error: error.message, projectData });
+      // Abort transaction on error
+      await session.abortTransaction();
+      logger.error('Error creating project', { 
+        error: error.message, 
+        projectData,
+        message: 'Transaction rolled back'
+      });
       throw error;
+    } finally {
+      // Always end session
+      session.endSession();
     }
   }
 
@@ -196,6 +230,64 @@ class ProjectRepository {
       return projects;
     } catch (error) {
       logger.error('Error finding projects by status', { status, error: error.message });
+      throw error;
+    }
+  }
+
+  /**
+   * Safely search projects with input validation (prevents NoSQL injection)
+   * @param {Object} filters - Filter criteria (validated and sanitized)
+   * @param {Object} options - Query options
+   * @returns {Promise<Array>} Array of projects
+   */
+  async secureSearch(filters = {}, options = {}) {
+    try {
+      // Allowed filter fields to prevent operator injection
+      const ALLOWED_FILTERS = ['name', 'framework', 'status', 'createdAt', 'updatedAt'];
+      const sanitizedFilters = { deletedAt: null }; // Always exclude deleted projects
+
+      for (const [key, value] of Object.entries(filters)) {
+        // Only allow whitelisted fields
+        if (!ALLOWED_FILTERS.includes(key)) {
+          logger.warn(`Rejecting unauthorized filter field: ${key}`);
+          continue;
+        }
+
+        // Prevent operator injection by rejecting objects with $ keys
+        if (value !== null && typeof value === 'object') {
+          const hasOperators = Object.keys(value).some(k => k.startsWith('$'));
+          if (hasOperators) {
+            logger.warn(`Rejecting filter with MongoDB operators for field: ${key}`);
+            continue;
+          }
+        }
+
+        // For string/number/boolean values, accept as-is
+        // For objects, they must be explicit allowed formats
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+          sanitizedFilters[key] = value;
+        } else if (value === null) {
+          sanitizedFilters[key] = null;
+        } else {
+          logger.warn(`Rejecting non-primitive filter value for field: ${key}`);
+          continue;
+        }
+      }
+
+      const { limit = 100, skip = 0, sort = { createdAt: -1 } } = options;
+
+      const projects = await Project.find(sanitizedFilters)
+        .limit(Math.min(limit, 1000)) // Cap limit at 1000
+        .skip(Math.max(skip, 0))
+        .sort(sort);
+
+      logger.debug('Secure search completed', { 
+        filterCount: Object.keys(sanitizedFilters).length, 
+        resultCount: projects.length 
+      });
+      return projects;
+    } catch (error) {
+      logger.error('Error in secure search', { error: error.message });
       throw error;
     }
   }
